@@ -1,0 +1,10 @@
+{
+	"data": {
+		"AccessToken": "LongToken",
+		"ExpiresIn": 3600,
+		"IdToken": "LongToken",
+		"TokenType": "Bearer"
+	},
+	"error": false,
+	"message": "Refreshed"
+}

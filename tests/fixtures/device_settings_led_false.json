@@ -1,0 +1,235 @@
+{
+	"data": {
+		"audio_alarm_enabled": false,
+		"audio_cmd_enabled": false,
+		"aws_region": "",
+		"button_notifications": true,
+		"button_pressed": true,
+		"checkin_missed": {
+		},
+		"checkin_warning": {
+		},
+		"chime_file": "",
+		"chime_file_motion": "",
+		"chime_mode": false,
+		"co_alarm": {
+		},
+		"debug_motion_detect": true,
+		"digital_chime": false,
+		"event_duration": 30,
+		"fd_sensitivity": 500,
+		"fr_sensitivity": 500,
+		"hmbd_sensitivity": 500,
+		"image_aspect": "Wide",
+		"image_quality": 0,
+		"indoor_chime": true,
+		"led_color": "",
+		"led_control": "Normal",
+		"modes": [
+		],
+		"motion_chime": false,
+		"motion_chime_color": "#00FFFF",
+		"motion_chime_volume": 2,
+		"motion_detection": true,
+		"motion_notifications": true,
+		"motion_sensitivity": 1000,
+		"motion_zone_config": {
+			"threshold": 1,
+			"x": 8,
+			"y": 5,
+			"zones": [
+				[
+					{
+						"ignore": false,
+						"sensitivity": 90
+					},
+					{
+						"ignore": false,
+						"sensitivity": 90
+					},
+					{
+						"ignore": false,
+						"sensitivity": 90
+					},
+					{
+						"ignore": false,
+						"sensitivity": 90
+					},
+					{
+						"ignore": false,
+						"sensitivity": 90
+					},
+					{
+						"ignore": false,
+						"sensitivity": 90
+					},
+					{
+						"ignore": false,
+						"sensitivity": 90
+					},
+					{
+						"ignore": false,
+						"sensitivity": 90
+					}
+				],
+				[
+					{
+						"ignore": false,
+						"sensitivity": 90
+					},
+					{
+						"ignore": false,
+						"sensitivity": 90
+					},
+					{
+						"ignore": false,
+						"sensitivity": 90
+					},
+					{
+						"ignore": false,
+						"sensitivity": 90
+					},
+					{
+						"ignore": false,
+						"sensitivity": 90
+					},
+					{
+						"ignore": false,
+						"sensitivity": 90
+					},
+					{
+						"ignore": false,
+						"sensitivity": 90
+					},
+					{
+						"ignore": false,
+						"sensitivity": 90
+					}
+				],
+				[
+					{
+						"ignore": false,
+						"sensitivity": 90
+					},
+					{
+						"ignore": false,
+						"sensitivity": 90
+					},
+					{
+						"ignore": false,
+						"sensitivity": 90
+					},
+					{
+						"ignore": false,
+						"sensitivity": 90
+					},
+					{
+						"ignore": false,
+						"sensitivity": 90
+					},
+					{
+						"ignore": false,
+						"sensitivity": 90
+					},
+					{
+						"ignore": false,
+						"sensitivity": 90
+					},
+					{
+						"ignore": false,
+						"sensitivity": 90
+					}
+				],
+				[
+					{
+						"ignore": false,
+						"sensitivity": 90
+					},
+					{
+						"ignore": false,
+						"sensitivity": 90
+					},
+					{
+						"ignore": false,
+						"sensitivity": 90
+					},
+					{
+						"ignore": false,
+						"sensitivity": 90
+					},
+					{
+						"ignore": false,
+						"sensitivity": 90
+					},
+					{
+						"ignore": false,
+						"sensitivity": 90
+					},
+					{
+						"ignore": false,
+						"sensitivity": 90
+					},
+					{
+						"ignore": false,
+						"sensitivity": 90
+					}
+				],
+				[
+					{
+						"ignore": false,
+						"sensitivity": 90
+					},
+					{
+						"ignore": false,
+						"sensitivity": 90
+					},
+					{
+						"ignore": false,
+						"sensitivity": 90
+					},
+					{
+						"ignore": false,
+						"sensitivity": 90
+					},
+					{
+						"ignore": false,
+						"sensitivity": 90
+					},
+					{
+						"ignore": false,
+						"sensitivity": 90
+					},
+					{
+						"ignore": false,
+						"sensitivity": 90
+					},
+					{
+						"ignore": false,
+						"sensitivity": 90
+					}
+				]
+			]
+		},
+		"outdoor_chime": true,
+		"outdoor_chime_color": "#ffffff",
+		"outdoor_chime_volume": 2,
+		"pir_light_duration": 10,
+		"pir_light_level": 100,
+		"pir_light_trigger": true,
+		"pir_sensitivity": 524,
+		"selected_mode_id": 0,
+		"simple_cv_mode": false,
+		"smoke_alarm": {
+		},
+		"sos_alarm": {
+		},
+		"speaker_volume": 1,
+		"stream_disable_motion": true,
+		"telemetry_freq": 60,
+		"time_zone": "CST6CDT,M3.2.0,M11.1.0",
+		"video_datetime": true,
+		"video_rotation": 0
+	},
+	"error": false,
+	"message": "OK"
+}

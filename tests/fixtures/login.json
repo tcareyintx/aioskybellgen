@@ -1,0 +1,20 @@
+{
+    "data": {
+        "$metadata": {
+            "attempts": 1,
+            "httpStatusCode": 200,
+            "requestId": "504052aa-e0a0-46d7-bd25-343e1eaba5eb",
+            "totalRetryDelay": 0
+        },
+        "AuthenticationResult": {
+            "AccessToken": "superlongkey",
+            "ExpiresIn": 3600,
+            "IdToken": "superlongkey",
+            "RefreshToken": "refreshtoken",
+            "TokenType": "Bearer"
+        },
+        "ChallengeParameters": {}
+    },
+    "error": false,
+    "message": "OK"
+}

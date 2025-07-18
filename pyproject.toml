@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools >= 77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aioskybellgen"
+version = "1.0.0"
+dependencies = [
+	"aiofiles>=0.3.0",
+	"aiohttp>=3.6.1,<4.0",
+	"aresponses>=2.1.4",
+	"black>=21.11b1",
+	"isort>=5.10.1",
+	"flake8>=4.0.1",
+	"flake8-docstrings>=1.6.0",
+	"freezegun==1.5.2",
+	"mypy>=0.910",
+	"pylint>=2.12.1",
+	"pytest-cov>=3.0.0",
+	"pytest-asyncio>=0.16.0",
+	"pytest-freezer>=0.4.8",
+	"pytest>=6.2.4",
+	"types-aiofiles>=0.8.3",
+]
+requires-python = ">=3.9"
+authors = [
+  {name = "Tim Carey", email = "tlcareyintx@gmail.com"},
+]
+maintainers = [
+  {name = "Tim Carey", email = "tlcareyintx@gmail.com"},
+]
+description = "A Skybell Gen5 API Python library running on Python 3."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICEN[CS]E.*"]
+keywords = ["aioskybellgen", "skybellgen"]
+classifiers = [
+	"Development Status :: 4 - Beta",
+	"Intended Audience :: Developers",
+	"Natural Language :: English",
+	"Operating System :: OS Independent",
+	"Programming Language :: Python :: 3",
+	"Programming Language :: Python :: 3.9",
+	"Programming Language :: Python :: 3.10",
+	"Programming Language :: Python :: 3.11",
+	"Programming Language :: Python :: 3.12",
+	"Programming Language :: Python :: 3.13",
+	"Topic :: Software Development :: Libraries :: Python Modules"
+]
+
+[project.urls]
+Repository = "https://github.com/tcareyintx/aioskybellgen.git"
+"Bug Tracker" = "https://github.com/tcareyintx/aioskybellgen/issues"
