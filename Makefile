@@ -11,12 +11,12 @@ requirements: ## Install requirements
 lint: ## Lint all files
 	@isort .
 	@python3 -m black --fast .
-	@python3 -m pylint aioskybell tests
-	@python3 -m flake8 aioskybell tests
-	@python3 -m mypy aioskybell
+	@python3 -m pylint aioskybellgen tests
+	@python3 -m flake8 aioskybellgen tests
+	@python3 -m mypy aioskybellgen
 
 coverage: ## Check the coverage of the package
-	@python3 -m pytest tests --asyncio-mode=strict --cov=aioskybell --cov-report term-missing -vv
+	@python3 -m pytest tests --asyncio-mode=strict --cov=aioskybellgen --cov-report term-missing -vv
 
 setup: ## Setup the package
 	@python3 -m build
