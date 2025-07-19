@@ -234,9 +234,8 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
             if response is not None and response:
                 response_rows = response[CONST.RESPONSE_ROWS]
                 for device_json in response_rows:
-                    device = self._devices.get(device_json[CONST.DEVICE_ID])
                     # No existing device, create a new one
-                    if device:
+                    if device := self._devices.get(device_json[CONST.DEVICE_ID]):
                         await device.async_update(
                             {device_json[CONST.DEVICE_ID]: device_json}
                         )
@@ -257,9 +256,7 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
             await self.async_get_devices(refresh=refresh)
             refresh = False
 
-        device = self._devices.get(device_id)
-
-        if not device:
+        if not (device := self._devices.get(device_id)):
             raise SkybellException(self, "Device not found")
         if refresh:
             await device.async_update(refresh=refresh)
@@ -297,8 +294,7 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
     def session_refresh_timestamp(self) -> datetime | None:
         """Return expiration datetime that the session will last."""
         expires = None
-        auth_result = self.cache(CONST.AUTHENTICATION_RESULT)
-        if auth_result:
+        if auth_result := self.cache(CONST.AUTHENTICATION_RESULT):
             expires = cast(dict[str, Any], auth_result).get(CONST.EXPIRATION_DATE, None)
 
         return expires

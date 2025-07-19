@@ -33,8 +33,7 @@ async def async_load_cache(
 
 def calculate_expiration(expires_in: int, slack: int, refresh_cycle: int) -> datetime:
     """Calculate the expiration datetime."""
-    adj_expires_in = expires_in - slack
-    if adj_expires_in <= refresh_cycle:
+    if (adj_expires_in := expires_in - slack) <= refresh_cycle:
         adj_expires_in = expires_in
     expires = datetime.now() + timedelta(seconds=adj_expires_in)
 

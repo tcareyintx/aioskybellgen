@@ -2,8 +2,7 @@
 
 # pylint:disable=redefined-outer-name
 import asyncio
-from collections.abc import Callable
-from typing import AsyncGenerator
+from collections.abc import AsyncGenerator, Callable
 
 from aiohttp import ClientSession
 import pytest_asyncio

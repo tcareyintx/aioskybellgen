@@ -9,10 +9,10 @@ requirements: ## Install requirements
 	@python3 -m pip --disable-pip-version-check install -r requirements.txt
 
 lint: ## Lint all files
-	@pythone -m isort .
-	@python3 -m black --fast
+	@python3 -m isort .
+	@python3 -m black --fast src tests
 	@python3 -m pylint src tests
-	@python3 -m flake8 src tests
+	@python3 -m flake8 --max-line-length=88 src tests
 	@python3 -m mypy src
 
 coverage: ## Check the coverage of the package

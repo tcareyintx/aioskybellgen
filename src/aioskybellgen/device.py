@@ -200,23 +200,20 @@ class SkybellDevice:
             # If the Normal LED value is True - use the color
             # else clear the color
             if value:
-                value = self.led_color
-                if not value:
+                if not (value := self.led_color):
                     value = CONST.DEFAULT_NORMAL_LED_COLOR
             else:
                 value = ""
         elif key == CONST.NAME:
             key = CONST.DEVICE_NAME
         elif key in CONST.BASIC_MOTION_FIELDS:
-            bm = self.basic_motion.copy()
-            if not bm:
+            if not (bm := self.basic_motion.copy()):
                 raise SkybellException(self, ERROR.INVALID_SETTING_VALUE, (key, value))
             bm[key] = value
             key = CONST.BASIC_MOTION
             value = bm
         elif key in CONST.TIME_ZONE_FIELDS:
-            loc = self.location.copy()
-            if not loc:
+            if not (loc := self.location.copy()):
                 raise SkybellException(self, ERROR.INVALID_SETTING_VALUE, (key, value))
             loc[key] = value
             key = CONST.TIMEZONE_INFO
@@ -545,8 +542,7 @@ class SkybellDevice:
     @property
     def last_connected(self) -> datetime | None:
         """Get last connected timestamp."""
-        tss = self._device_json.get(CONST.LAST_CONNECTED, None)
-        if tss is not None:
+        if (tss := self._device_json.get(CONST.LAST_CONNECTED, None)) is not None:
             try:
                 ts = datetime.fromisoformat(tss)
             except ValueError:
@@ -558,8 +554,7 @@ class SkybellDevice:
     @property
     def last_disconnected(self) -> datetime | None:
         """Get last connected timestamp."""
-        tss = self._device_json.get(CONST.LAST_DISCONNECTED, None)
-        if tss is not None:
+        if (tss := self._device_json.get(CONST.LAST_DISCONNECTED, None)) is not None:
             try:
                 ts = datetime.fromisoformat(tss)
             except ValueError:
@@ -589,10 +584,8 @@ class SkybellDevice:
     @property
     def latest_doorbell_event_time(self) -> datetime | None:
         """Get latest doorbell event."""
-        act = self.latest(event_type=CONST.DOORBELL_ACTIVITY)
-        if act:
-            act_time = act.get(CONST.EVENT_TIME, None)
-            if act_time is not None:
+        if act := self.latest(event_type=CONST.DOORBELL_ACTIVITY):
+            if (act_time := act.get(CONST.EVENT_TIME, None)) is not None:
                 # Event time is a js unix format needs adapted to unix time.
                 act_time = datetime.fromtimestamp(act_time / 1000, tz=timezone.utc)
         else:
@@ -602,10 +595,8 @@ class SkybellDevice:
     @property
     def latest_livestream_event_time(self) -> datetime | None:
         """Get latest livestream event."""
-        act = self.latest(event_type=CONST.LIVESTREAM_ACTIVITY)
-        if act:
-            act_time = act.get(CONST.EVENT_TIME, None)
-            if act_time is not None:
+        if act := self.latest(event_type=CONST.LIVESTREAM_ACTIVITY):
+            if (act_time := act.get(CONST.EVENT_TIME, None)) is not None:
                 # Event time is a js unix format needs adapted to unix time.
                 act_time = datetime.fromtimestamp(act_time / 1000, tz=timezone.utc)
         else:
@@ -615,10 +606,8 @@ class SkybellDevice:
     @property
     def latest_motion_event_time(self) -> datetime | None:
         """Get latest motion event."""
-        act = self.latest(event_type=CONST.MOTION_ACTIVITY)
-        if act:
-            act_time = act.get(CONST.EVENT_TIME, None)
-            if act_time is not None:
+        if act := self.latest(event_type=CONST.MOTION_ACTIVITY):
+            if (act_time := act.get(CONST.EVENT_TIME, None)) is not None:
                 # Event time is a js unix format needs adapted to unix time.
                 act_time = datetime.fromtimestamp(act_time / 1000, tz=timezone.utc)
         else:
@@ -641,8 +630,7 @@ class SkybellDevice:
     def wifi_ssid(self) -> str:
         """Get the wifi ssid."""
         telemetry = self._device_json.get(CONST.DEVICE_TELEMETRY, {})
-        ssid = telemetry.get(CONST.WIFI_SSID, "")
-        if not ssid:
+        if not (ssid := telemetry.get(CONST.WIFI_SSID, "")):
             device_settings = self._device_json.get(CONST.DEVICE_SETTINGS, {})
             ssid = device_settings.get(CONST.WIFI_ESSID, "")
         return ssid
