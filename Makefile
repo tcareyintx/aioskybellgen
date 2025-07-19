@@ -9,14 +9,14 @@ requirements: ## Install requirements
 	@python3 -m pip --disable-pip-version-check install -r requirements.txt
 
 lint: ## Lint all files
-	@isort .
-	@python3 -m black --fast .
-	@python3 -m pylint aioskybellgen tests
-	@python3 -m flake8 aioskybellgen tests
-	@python3 -m mypy aioskybellgen
+	@pythone -m isort .
+	@python3 -m black --fast
+	@python3 -m pylint src tests
+	@python3 -m flake8 src tests
+	@python3 -m mypy src
 
 coverage: ## Check the coverage of the package
-	@python3 -m pytest tests --asyncio-mode=strict --cov=aioskybellgen --cov-report term-missing -vv
+	@python3 -m pytest tests
 
 setup: ## Setup the package
 	@python3 -m build

@@ -12,10 +12,10 @@ www.skybell.com for more information. I am in no way affiliated with Skybell.
 from __future__ import annotations
 
 import asyncio
-import logging
-import os
 from asyncio.exceptions import TimeoutError as Timeout
 from datetime import datetime
+import logging
+import os
 from typing import Any, cast
 
 from aiohttp.client import ClientSession, ClientTimeout
@@ -34,8 +34,7 @@ from .exceptions import (
     SkybellRequestException,
     SkybellUnknownResourceException,
 )
-from .helpers import const as CONST
-from .helpers import errors as ERROR
+from .helpers import const as CONST, errors as ERROR
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -186,7 +185,6 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
 
         Exceptions: SkybellAuthentionException, SkybellException.
         """
-
         auth_result = self.cache(CONST.AUTHENTICATION_RESULT)
         refresh_token = ""
         if auth_result:

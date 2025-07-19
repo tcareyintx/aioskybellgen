@@ -5,21 +5,21 @@ Test Skybell device functionality.
 Tests the device initialization and attributes of the Skybell device class.
 """
 
-import os
 from asyncio.exceptions import TimeoutError as Timeout
 from datetime import datetime, timedelta
+import os
 from unittest.mock import patch
 
 import aiofiles
-import pytest
 from aiohttp import ClientConnectorError
 from aresponses import ResponsesMockServer
 from freezegun.api import FrozenDateTimeFactory
+import pytest
 
-from aioskybellgen import Skybell, exceptions
-from aioskybellgen import utils as UTILS
+from aioskybellgen import Skybell, exceptions, utils as UTILS
 from aioskybellgen.device import SkybellDevice
 from aioskybellgen.helpers import const as CONST
+
 from tests import EMAIL, PASSWORD, load_fixture
 
 

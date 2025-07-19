@@ -2,17 +2,16 @@
 
 from __future__ import annotations
 
-import logging
 from base64 import b64decode
 from datetime import datetime, timezone
+import logging
 from typing import TYPE_CHECKING, Any, cast
 
 import aiofiles
 
 from . import utils as UTILS
 from .exceptions import SkybellAccessControlException, SkybellException
-from .helpers import const as CONST
-from .helpers import errors as ERROR
+from .helpers import const as CONST, errors as ERROR
 from .helpers.const import RESPONSE_ROWS
 
 from .helpers.models import (  # isort:skip
@@ -24,7 +23,7 @@ from .helpers.models import (  # isort:skip
     LiveStreamConnectionData,
 )
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from . import Skybell
 
 _LOGGER = logging.getLogger(__name__)

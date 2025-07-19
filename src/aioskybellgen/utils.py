@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import pickle
 from datetime import datetime, timedelta
+import pickle
 from typing import Any
 
 import aiofiles
