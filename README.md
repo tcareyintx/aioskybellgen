@@ -3,7 +3,7 @@ _Asynchronous python communication driver for Skybell Cloud APIs_
 
 ![python version](https://img.shields.io/badge/Python-3.9=><=3.13-blue.svg)
 [![PyPI](https://img.shields.io/pypi/v/aioskybellgen)](https://pypi.org/project/aioskybellgen)
-![Actions](https://github.com/tkdrobtcareyintx/aioskybellgen/workflows/Actions/badge.svg?branch=main)
+![Actions](https://github.com/tcareyintx/aioskybellgen/workflows/Actions/badge.svg?branch=main)
 
 
 ## Installation
@@ -51,4 +51,4 @@ except KeyboardInterrupt:
 5. Ensure all tests passes with `make test`
 6. Ensure 100% coverage with `make coverage`
 7. Commit your work, and push it to GitHub
-8. Create a PR against the `master` branch
+8. Create a PR against the `develop` branch
