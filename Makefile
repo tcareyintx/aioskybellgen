@@ -18,5 +18,5 @@ lint: ## Lint all files
 coverage: ## Check the coverage of the package
 	@python3 -m pytest tests
 
-setup: ## Setup the package
+build: ## Build the package
 	@python3 -m build
