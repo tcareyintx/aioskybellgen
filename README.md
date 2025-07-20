@@ -3,8 +3,6 @@ _Asynchronous python communication driver for Skybell Cloud APIs_
 
 ![python version](https://img.shields.io/badge/Python-3.9=><=3.13-blue.svg)
 [![PyPI](https://img.shields.io/pypi/v/aioskybellgen)](https://pypi.org/project/aioskybellgen)
-![Actions](https://github.com/tcareyintx/aioskybellgen/workflows/Actions/badge.svg?branch=main)
-
 
 ## Installation
 
