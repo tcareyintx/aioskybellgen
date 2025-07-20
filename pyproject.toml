@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools >= 77.0.3"]
+requires = ["setuptools >= 77.0.3", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -47,6 +47,8 @@ classifiers = [
 	"Programming Language :: Python :: 3.13",
 	"Topic :: Software Development :: Libraries :: Python Modules"
 ]
+
+[tool.setuptools_scm]
 
 [project.urls]
 Repository = "https://github.com/tcareyintx/aioskybellgen.git"
