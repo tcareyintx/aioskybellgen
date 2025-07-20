@@ -1,0 +1,13 @@
+{
+    "error": "FALSE",
+    "message": "OK",
+    "data": {
+        "account_id": "1234567890abcdef12345678",
+        "user_since": "2025-01-04T23: 22: 17.274Z",
+        "fname": "First",
+        "lname": "Last",
+        "email": "email@me.com",
+        "eula_accepted": "2025-01-04T23: 22: 17.225Z",
+        "user_mobile_settings": {}
+    }
+}
