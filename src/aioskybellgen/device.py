@@ -57,7 +57,7 @@ class SkybellDevice:
 
     async def _async_settings_request(
         self,
-        json: dict[str, bool | str | int | dict] | None = None,
+        json: dict[str, bool | str | int | float | dict] | None = None,
         **kwargs: Any,
     ) -> SettingsData:
         url = str.replace(CONST.DEVICE_SETTINGS_URL, "$DEVID$", self.device_id)
@@ -187,7 +187,7 @@ class SkybellDevice:
                     latest_date = date
         return latest_event
 
-    async def async_set_setting(self, key: str, value: bool | str | int | dict) -> None:
+    async def async_set_setting(self, key: str, value: bool | str | int | float | dict) -> None:
         """Call the API to update the settings."""
         # Set an attribute for the device.
         # The key isn't necessarily equal to the corresponding field
@@ -223,7 +223,7 @@ class SkybellDevice:
         return await self._async_set_setting({key: value})
 
     async def _async_set_setting(
-        self, settings: dict[str, bool | str | int | dict]
+        self, settings: dict[str, bool | str | int | float | dict]
     ) -> None:
         """Validate the settings and then send the POST request."""
         for key, value in settings.items():
@@ -399,7 +399,7 @@ class SkybellDevice:
         return
 
     def _validate_setting(  # pylint:disable=too-many-branches # noqa: C901
-        self, setting: str, value: bool | str | int | dict
+        self, setting: str, value: bool | str | int | float | dict
     ) -> None:
         """Validate the public property setting and value.
 
