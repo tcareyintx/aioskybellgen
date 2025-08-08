@@ -187,7 +187,9 @@ class SkybellDevice:
                     latest_date = date
         return latest_event
 
-    async def async_set_setting(self, key: str, value: bool | str | int | float | dict) -> None:
+    async def async_set_setting(
+        self, key: str, value: bool | str | int | float | dict
+    ) -> None:
         """Call the API to update the settings."""
         # Set an attribute for the device.
         # The key isn't necessarily equal to the corresponding field
