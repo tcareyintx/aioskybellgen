@@ -10,5 +10,26 @@
         "red": 0,
         "yellow": 60,
         "green": 90
-    }
+    },
+    "launch": {
+        "version": "0.2.0",
+        "configurations": [
+            {
+                "name": "Python: Debug Tests (pytest)",
+                "type": "debugpy",
+                "purpose": [
+                    "debug-test"
+                ],
+                "request": "launch",
+                "module": "pytest",
+                "args": [
+                    "."
+                ],
+                "console": "integratedTerminal",
+                "justMyCode": true
+            }
+        ],
+        "compounds": []
+    },
+    "debugpy.debugJustMyCode": false
 }

@@ -22,7 +22,7 @@ dependencies = [
 	"pytest>=6.2.4",
 	"types-aiofiles>=0.8.3",
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 authors = [
   {name = "Tim Carey", email = "tlcareyintx@gmail.com"},
 ]
@@ -39,9 +39,7 @@ classifiers = [
 	"Intended Audience :: Developers",
 	"Natural Language :: English",
 	"Operating System :: OS Independent",
-	"Programming Language :: Python :: 3",
-	"Programming Language :: Python :: 3.9",
-	"Programming Language :: Python :: 3.10",
+	"Programming Language :: Python :: 3",,
 	"Programming Language :: Python :: 3.11",
 	"Programming Language :: Python :: 3.12",
 	"Programming Language :: Python :: 3.13",
@@ -55,8 +53,11 @@ Repository = "https://github.com/tcareyintx/aioskybellgen.git"
 "Bug Tracker" = "https://github.com/tcareyintx/aioskybellgen/issues"
 
 [tool.pytest.ini_options]
+pythonpath = [
+  "src"
+]
 asyncio_mode = "strict"
-addopts = "--verbosity=9 --asyncio-mode=strict  --cov=aioskybellgen --cov-report term-missing -vv"
+addopts = "--verbosity=9 --asyncio-mode=strict  --no-cov"
 testpaths = [
     "tests",
 ]
