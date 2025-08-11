@@ -10,7 +10,6 @@
         "red": 0,
         "yellow": 60,
         "green": 90
-<<<<<<< HEAD
     },
     "launch": {
         "version": "0.2.0",
@@ -33,7 +32,4 @@
         "compounds": []
     },
     "debugpy.debugJustMyCode": false
-=======
-    }
->>>>>>> refs/heads/main
 }
