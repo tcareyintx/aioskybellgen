@@ -57,7 +57,7 @@ pythonpath = [
   "src"
 ]
 asyncio_mode = "strict"
-addopts = "--verbosity=9 --asyncio-mode=strict  --no-cov"
+addopts = "--verbosity=9 --asyncio-mode=strict  --cov=aioskybellgen --cov-report term-missing -vv"
 testpaths = [
     "tests",
 ]
