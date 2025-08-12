@@ -6,7 +6,7 @@ build>=1.2.1
 isort>=5.10.1
 flake8>=4.0.1
 flake8-docstrings>=1.6.0
-freezegun==1.5.1
+freezegun>=1.5.1
 mypy>=0.910
 pylint>=2.12.1
 pytest-cov>=3.0.0
