@@ -242,7 +242,7 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
         device = SkybellDevice(device_json=device_data, skybell=self)
         device._device_id = device_id
         device._device_json[CONST.DEVICE_ID] = device_id
-        device._device_json[CONST.DEVICE_NAME] = "second_device name"
+        device._device_json[CONST.NAME] = "second_device name"
         device._device_json["serial"] = "second_device_sernum"
         device_settings = device._device_json.get(CONST.DEVICE_SETTINGS)
         device_settings[CONST.SERIAL_NUM] = "second_device_sernum"
