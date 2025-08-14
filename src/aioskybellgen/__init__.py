@@ -36,7 +36,6 @@ from .exceptions import (
     SkybellUnknownResourceException,
 )
 from .helpers import const as CONST, errors as ERROR
-from dns.rdataclass import NONE
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -235,7 +234,7 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
         """Return two Skybell devices."""
     
         device_id = CONST.DUMMY_DEVICE_ID
-        device_data = copy.deepcopy(data)
+        device_data: dict[Any, Any] = copy.deepcopy(data)
         device = SkybellDevice(device_json=device_data, skybell=self)
         device._device_id = device_id
         device._device_json[CONST.DEVICE_ID] = device_id
@@ -250,6 +249,9 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
 
         Exceptions: SkybellException.
         """
+        if not self._add_dummy_device:
+            if CONST.DUMMY_DEVICE_ID in self._devices:
+                del self._devices[CONST.DUMMY_DEVICE_ID]
         if refresh or len(self._devices) == 0:
             _LOGGER.info("Updating all devices...")
             response = await self.async_send_request(CONST.DEVICES_URL)
@@ -257,7 +259,7 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
             if response is not None and response:
                 response_rows = response[CONST.RESPONSE_ROWS]
                 dummy_json = None
-                if response_rows:
+                if response_rows and self._add_dummy_device:
                     dummy_json = response_rows[0]
                 for device_json in response_rows:
                     # No existing device, create a new one
