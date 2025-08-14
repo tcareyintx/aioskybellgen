@@ -1,7 +1,7 @@
 """An asynchronous client for Skybell Generation v5 API.
 
 Async spinoff of https://github.com/MisterWil/skybellpy
-             and https://github.com/tkdrob/aioskybellgen
+             and https://github.com/tkdrob/aioskybell
 
 Published under the MIT license - See LICENSE file for more details.
 
@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import asyncio
 from asyncio.exceptions import TimeoutError as Timeout
+import copy
 from datetime import datetime
 import logging
 import os
@@ -35,6 +36,7 @@ from .exceptions import (
     SkybellUnknownResourceException,
 )
 from .helpers import const as CONST, errors as ERROR
+from dns.rdataclass import NONE
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -76,6 +78,8 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
         self._cache: dict[str, Any] = {
             CONST.AUTHENTICATION_RESULT: {},
         }
+        
+        self._add_dummy_device = False
 
     async def __aenter__(self) -> Skybell:
         """Async enter."""
@@ -85,6 +89,11 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
         """Async exit."""
         if self._session and self._close_session:
             await self._session.close()
+
+    async def add_dummy_device(self, add_device: bool) -> None:
+        """Set the condition to add a dummy device"""
+        self._add_dummy_device = add_device
+        
 
     async def async_initialize(self) -> list[SkybellDevice]:
         """Initialize the Skybell API.
@@ -222,10 +231,24 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
 
         return True
 
+    def get_duplicated_device(self, data: dict) -> SkybellDevice:
+        """Return two Skybell devices."""
+    
+        device_id = CONST.DUMMY_DEVICE_ID
+        device_data = copy.deepcopy(data)
+        device = SkybellDevice(device_json=device_data, skybell=self)
+        device._device_id = device_id
+        device._device_json[CONST.DEVICE_ID] = device_id
+        device._device_json["serial"] = "second_device_sernum"
+        device_settings = device._device_json.get(CONST.DEVICE_SETTINGS)
+        device_settings[CONST.SERIAL_NUM] = "second_device_sernum"
+        device_settings[CONST.MAC_ADDRESS] = "FF:EE:DD:CC:BB:AA"
+        return device
+    
     async def async_get_devices(self, refresh: bool = False) -> list[SkybellDevice]:
         """Get all devices from Skybell.
 
-        Exceptions: kybellException.
+        Exceptions: SkybellException.
         """
         if refresh or len(self._devices) == 0:
             _LOGGER.info("Updating all devices...")
@@ -233,6 +256,9 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
             _LOGGER.debug("Get Devices Response: %s", response)
             if response is not None and response:
                 response_rows = response[CONST.RESPONSE_ROWS]
+                dummy_json = None
+                if response_rows:
+                    dummy_json = response_rows[0]
                 for device_json in response_rows:
                     # No existing device, create a new one
                     if device := self._devices.get(device_json[CONST.DEVICE_ID]):
@@ -242,6 +268,9 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
                     else:
                         device = SkybellDevice(device_json, self)
                         self._devices[device.device_id] = device
+                if dummy_json is not None:
+                    dummy_device = self.get_duplicated_device(data=dummy_json)
+                    self._devices[dummy_device.device_id] = dummy_device
 
         return list(self._devices.values())
 

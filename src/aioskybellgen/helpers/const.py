@@ -12,6 +12,7 @@ class HTTPMethod(Enum):
     POST = "POST"
     PUT = "PUT"
 
+DUMMY_DEVICE_ID = "second_device"
 
 CACHE_PATH = "./skybell.pickle"
 

@@ -90,6 +90,11 @@ class SkybellDevice:
         get_devices: bool = False,
     ) -> None:
         """Update the internal data from the API."""
+        
+        # Return if dommy device
+        if self.device_id == CONST.DUMMY_DEVICE_ID:
+            return
+        
         # Update the internal device json data.
         if refresh or device_json or not self._device_json:
             if get_devices:
