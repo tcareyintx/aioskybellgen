@@ -1,7 +1,7 @@
 """An asynchronous client for Skybell Generation v5 API.
 
 Async spinoff of https://github.com/MisterWil/skybellpy
-             and https://github.com/tkdrob/aioskybellgen
+             and https://github.com/tkdrob/aioskybell
 
 Published under the MIT license - See LICENSE file for more details.
 
