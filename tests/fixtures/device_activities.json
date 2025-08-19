@@ -20,7 +20,7 @@
                 "event_time": 1751732391135,
                 "event_type": "doorbell",
                 "events": [
-                    "https://skybell-gen5-video.s3.us-east-2.amazonaws.com/7d4a3650-7b5d-4fb1-bd7a-f212a8f2d2bb/d11fd596-eaa3-41fd-af5a-d03b3b8d70fa/videos/bdc15f68-4c7b-41e2-8c54-adfb800898a9/bdc15f68-4c7b-41e2-8c54-adfb800898a9/bdc15f68-4c7b-41e2-8c54-adfb800898a9_d11fd596-eaa3-41fd-af5a-d03b3b8d70fa_f62036731428df085b239f546358dce5201de636b47cd5bdf23fb23325955042_notify_preview.jpeg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIATCO5UBMTX3BKQ5E4%2F20250706%2Fus-east-2%2Fs3%2Faws4_request&X-Amz-Date=20250706T184345Z&X-Amz-Expires=300&X-Amz-Signature=a4f770f4e40b9ab0064b087a0d3cf8252c2b5e0c4b21f81e5b4a0a4bc1992ca3&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject"
+                    "Someevent"
                 ],
                 "image": null,
                 "video_ready": true,
@@ -42,7 +42,7 @@
                 "event_time": 1751732391134,
                 "event_type": "motion",
                 "events": [
-                    "https://skybell-gen5-video.s3.us-east-2.amazonaws.com/7d4a3650-7b5d-4fb1-bd7a-f212a8f2d2bb/d11fd596-eaa3-41fd-af5a-d03b3b8d70fa/videos/67792389-5d86-4554-82ce-6bf6a595d70b/67792389-5d86-4554-82ce-6bf6a595d70b/67792389-5d86-4554-82ce-6bf6a595d70b_d11fd596-eaa3-41fd-af5a-d03b3b8d70fa_00458d506562ac2780b635f45a1fe246aca19e5a8776aa0bb988e334087c6f14_notify_preview.jpeg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIATCO5UBMTX3BKQ5E4%2F20250706%2Fus-east-2%2Fs3%2Faws4_request&X-Amz-Date=20250706T184345Z&X-Amz-Expires=300&X-Amz-Signature=1b2fd5eecee2b5bf72a54ae21635ac306ba8aec9bf908ee9594d5a883f3dd177&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject"
+                    "Someevent"
                 ],
                 "image": null,
                 "video_ready": true,
@@ -64,7 +64,7 @@
                 "event_time": 1751732391133,
                 "event_type": "lstream",
                 "events": [
-                    "https://skybell-gen5-video.s3.us-east-2.amazonaws.com/7d4a3650-7b5d-4fb1-bd7a-f212a8f2d2bb/d11fd596-eaa3-41fd-af5a-d03b3b8d70fa/videos/bdc15f68-4c7b-41e2-8c54-adfb800898a9/bdc15f68-4c7b-41e2-8c54-adfb800898a9/bdc15f68-4c7b-41e2-8c54-adfb800898a9_d11fd596-eaa3-41fd-af5a-d03b3b8d70fa_f62036731428df085b239f546358dce5201de636b47cd5bdf23fb23325955042_notify_preview.jpeg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIATCO5UBMTX3BKQ5E4%2F20250706%2Fus-east-2%2Fs3%2Faws4_request&X-Amz-Date=20250706T184345Z&X-Amz-Expires=300&X-Amz-Signature=a4f770f4e40b9ab0064b087a0d3cf8252c2b5e0c4b21f81e5b4a0a4bc1992ca3&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject"
+                    "Someevent"
                 ],
                 "image": null,
                 "video_ready": true,
