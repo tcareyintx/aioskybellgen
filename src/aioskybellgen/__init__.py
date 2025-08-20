@@ -38,7 +38,6 @@ from .helpers import const as CONST, errors as ERROR
 
 _LOGGER = logging.getLogger(__name__)
 
-
 class Skybell:  # pylint:disable=too-many-instance-attributes
     """Main Skybell class."""
 
@@ -54,6 +53,7 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
         disable_cache: bool = False,
         login_sleep: bool = True,
         session: ClientSession | None = None,
+        capture_local_events: bool = False,
     ) -> None:
         """Initialize Skybell object."""
         self._auto_login = auto_login
@@ -76,6 +76,9 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
         self._cache: dict[str, Any] = {
             CONST.AUTHENTICATION_RESULT: {},
         }
+        self._capture_local_events = capture_local_events
+        self._local_event_server: asyncio.AbstractEventLoop | None = None
+        self._local_event_future: asyncio.Future | None = None
 
     async def __aenter__(self) -> Skybell:
         """Async enter."""
@@ -85,6 +88,45 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
         """Async exit."""
         if self._session and self._close_session:
             await self._session.close()
+        loop = self._local_event_server
+        if loop is not None:
+            if loop.is_running():
+                asyncio.run_coroutine_threadsafe(self._graceful_shutdown(), loop)
+            loop.stop()
+    
+    async def _graceful_shutdown(self):
+        future = cast(asyncio.Future, self._local_event_future)
+        if not future.done():
+            future.set_result(None)
+
+    async def setup_local_event_server(self) -> None:
+        """ Setup the local event server.
+            Parameters: 
+                stop: The future that controls the server lifecycle
+        """
+
+        loop = asyncio.get_running_loop()
+        stop = loop.create_future()
+        self._local_event_server = loop
+        self._local_event_future = stop
+
+        transport, _ = await loop.create_datagram_endpoint(
+            lambda: SkyBellUDPProtocol(self),
+            local_addr=(CONST.EVENT_SERVER_ADDR,
+                        CONST.EVENT_SERVER_PORT)
+        )
+        try:
+            await stop
+        finally:
+            transport.close()
+
+    def process_local_event_message(self, message_type: str, identifiers: dict[str, str]) -> None:
+        """Process the Event message for a device."""
+        for device in self._devices.values():
+            if CONST.DEVICE_IPADDR in identifiers.keys():
+                if device.ip_address == identifiers.get(CONST.DEVICE_IPADDR):
+                    device.set_local_event_message(message_type)
+                    break
 
     async def async_initialize(self) -> list[SkybellDevice]:
         """Initialize the Skybell API.
@@ -108,6 +150,12 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
         self._user = {}
         if response is not None and response:
             self._user = response
+            
+        # Setup the local events server if needed
+        if self._local_event_server is None and self._capture_local_events:
+            loop = asyncio.get_running_loop()
+            #loop.run_in_executor(None, lambda: asyncio.run(self.setup_local_event_server()))
+            loop.run_in_executor(None, lambda: asyncio.run(self.setup_local_event_server()))
 
         # Obtain the devices for the user
         devices = []
@@ -443,3 +491,44 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
             except Timeout:
                 return False
         return result
+
+
+
+class SkyBellUDPProtocol(asyncio.DatagramProtocol):
+    """ The SkyBell UDP Protocol class."""
+
+    def __init__(
+        self,
+        skybell: Skybell,
+    ) -> None:
+        """Initialize SkybellUDPProtocol object."""
+        self._skybell = skybell
+        self._transport = None
+
+    def connection_made(self, transport):
+        """Connection has been made."""
+        self._transport = transport
+        _LOGGER.debug(f'UDP Server connection made {transport}')
+
+    def datagram_received(self, data, addr):
+        """Process the received datagram."""
+
+        message_type = self.determine_broadcast_message(data)
+        _LOGGER.debug(f'Received message {message_type} from {addr}')
+        identifiers = dict()
+        identifiers[CONST.DEVICE_IPADDR] = addr[0]
+        
+        self._skybell.process_local_event_message(message_type, identifiers)
+        
+    def determine_broadcast_message(self, data: bytes) -> str:
+        """Determine the type of broadcast message."""
+
+        signature = data.hex().upper()
+        
+        message_type = CONST.UNKNOWN_EVENT
+        if signature.find(CONST.LOCAL_BUTTON_PRESSED_SIGNATURE, 0, len(CONST.LOCAL_BUTTON_PRESSED_SIGNATURE)) != -1:
+            message_type = CONST.BUTTON_PRESSED
+        elif signature.find(CONST.LOCAL_MOTION_DETECTION_SIGNATURE, 0, len(CONST.LOCAL_BUTTON_PRESSED_SIGNATURE)) != -1:
+            message_type = CONST.MOTION_DETECTION
+        
+        return message_type
