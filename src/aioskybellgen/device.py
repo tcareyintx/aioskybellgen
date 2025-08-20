@@ -461,8 +461,10 @@ class SkybellDevice:
                 raise SkybellException(ERROR.INVALID_SETTING_VALUE, (setting, value))
 
     def set_local_event_message(self, message_type: str) -> None:
-        """ Set the timestamp for the latest local event message."""
-        _LOGGER.debug(f'Setting local event message: {message_type} for {self.device_id}')
+        """Set the timestamp for the latest local event message."""
+        _LOGGER.debug(
+            "Setting local event message: %s for %s", message_type, self.device_id
+        )
         event_time = datetime.now(tz=timezone.utc)
         self._local_events[message_type] = event_time
 

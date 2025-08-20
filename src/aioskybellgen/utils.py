@@ -3,14 +3,13 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta
+import logging
 import pickle
 from typing import Any
-import logging
 
 import aiofiles
 
 from .helpers.models import DeviceType
-
 
 _LOGGER = logging.getLogger(__name__)
 
