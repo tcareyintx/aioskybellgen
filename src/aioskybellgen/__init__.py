@@ -12,7 +12,6 @@ www.skybell.com for more information. I am in no way affiliated with Skybell.
 from __future__ import annotations
 
 import asyncio
-from asyncio.exceptions import TimeoutError as Timeout
 from datetime import datetime
 import logging
 import os
@@ -80,6 +79,7 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
         self._capture_local_events = capture_local_events
         self._local_event_server: asyncio.AbstractEventLoop | None = None
         self._local_event_future: asyncio.Future | None = None
+        self._refresh_cycle: int = 0
 
     async def __aenter__(self) -> Skybell:
         """Async enter."""
@@ -100,7 +100,7 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
         if not future.done():
             future.set_result(None)
 
-    async def setup_local_event_server(self) -> None:
+    async def _setup_local_event_server(self) -> None:
         """Start the local event server."""
         loop = asyncio.get_running_loop()
         stop = loop.create_future()
@@ -154,7 +154,7 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
             loop = asyncio.get_running_loop()
             # loop.run_in_executor(None, lambda: asyncio.run(self.setup_local_event_server()))
             loop.run_in_executor(
-                None, lambda: asyncio.run(self.setup_local_event_server())
+                None, lambda: asyncio.run(self._setup_local_event_server())
             )
 
         # Obtain the devices for the user
@@ -198,16 +198,9 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
             _LOGGER.debug("Login Response: %s", response)
             # Store the Authorization result
             auth_result = response[CONST.AUTHENTICATION_RESULT]
-            # Add an expiration date
-            expires_in = auth_result[CONST.TOKEN_EXPIRATION]
-            expiration = UTILS.calculate_expiration(
-                expires_in=expires_in,
-                slack=CONST.EXPIRATION_SLACK,
-                refresh_cycle=CONST.REFRESH_CYCLE,
-            )
-            auth_result[CONST.EXPIRATION_DATE] = expiration
             await self.async_update_cache({CONST.AUTHENTICATION_RESULT: auth_result})
-
+            # Add/set the expiration date
+            await self.async_set_refresh_session_expiration(self._refresh_cycle)
             if self._login_sleep:
                 _LOGGER.info("Login successful, waiting 5 seconds...")
                 await asyncio.sleep(5)
@@ -253,22 +246,45 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
         )
         if response is not None and response:
             _LOGGER.debug("Token Refresh Response: %s", response)
-            # Add an expiration date
-            expires_in = response[CONST.TOKEN_EXPIRATION]
-            expiration = UTILS.calculate_expiration(
-                expires_in=expires_in,
-                slack=CONST.EXPIRATION_SLACK,
-                refresh_cycle=CONST.REFRESH_CYCLE,
-            )
-            response[CONST.EXPIRATION_DATE] = expiration
             # Update the cache entities
             UTILS.update(
                 cast(dict[str, Any], auth_result), cast(dict[str, Any], response)
             )
             await self.async_update_cache({CONST.AUTHENTICATION_RESULT: auth_result})
+            # Add/set the expiration date
+            await self.async_set_refresh_session_expiration(self._refresh_cycle)
             _LOGGER.debug("Refresh successful")
 
         return True
+
+    async def async_set_refresh_session_expiration(
+        self,
+        refresh_cycle: int,
+        slack: int = CONST.EXPIRATION_SLACK,
+    ) -> None:
+        """Set the expiration date to refresh the session.
+
+        Exceptions: SkybellException.
+        """
+        # Set expiration date based on the authorization result
+        auth_result: str | dict[str, Any] = self.cache(
+            CONST.AUTHENTICATION_RESULT
+        )  # pylint:disable=consider-using-assignment-expr
+        if not auth_result:
+            raise SkybellException(
+                "Unable to set expiration, Authentication result doesn't exist."
+            )
+        auth_result = cast(dict[str, Any], auth_result)
+        expires_in = auth_result[CONST.TOKEN_EXPIRATION]
+        expiration = UTILS.calculate_expiration(
+            expires_in=expires_in,
+            slack=slack,
+            refresh_cycle=refresh_cycle,
+        )
+        auth_result[CONST.EXPIRATION_DATE] = expiration
+        await self._async_save_cache()
+        self._refresh_cycle = refresh_cycle
+        _LOGGER.debug("Set auth expiration date to: %s", expiration)
 
     async def async_get_devices(self, refresh: bool = False) -> list[SkybellDevice]:
         """Get all devices from Skybell.
@@ -488,7 +504,7 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
             except ClientConnectorError as ex:
                 if ex.errno == 61:
                     result = True
-            except Timeout:
+            except TimeoutError:
                 return False
         return result
 
@@ -511,14 +527,14 @@ class SkyBellUDPProtocol(asyncio.DatagramProtocol):
 
     def datagram_received(self, data, addr):
         """Process the received datagram."""
-        message_type = self.determine_broadcast_message(data)
+        message_type = self._determine_broadcast_message(data)
         _LOGGER.debug("Received message %s from %s", message_type, addr)
         identifiers = {}
         identifiers[CONST.DEVICE_IPADDR] = addr[0]
 
         self._skybell.process_local_event_message(message_type, identifiers)
 
-    def determine_broadcast_message(self, data: bytes) -> str:
+    def _determine_broadcast_message(self, data: bytes) -> str:
         """Determine the type of broadcast message."""
         signature = data.hex().upper()
 

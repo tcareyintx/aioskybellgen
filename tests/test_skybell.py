@@ -1306,9 +1306,7 @@ async def test_cache(
     assert os.path.exists(old_cache_path) is False
 
     # Test the expires in min to the expires in
-    ts = UTILS.calculate_expiration(
-        expires_in=1, slack=0, refresh_cycle=CONST.REFRESH_CYCLE
-    )
+    ts = UTILS.calculate_expiration(expires_in=1, slack=0, refresh_cycle=30)
     ex_ts = datetime.now() + timedelta(seconds=1)
     assert ts == ex_ts
 

@@ -9,13 +9,11 @@ from typing import Any
 
 import aiofiles
 
-from .helpers.models import DeviceType
-
 _LOGGER = logging.getLogger(__name__)
 
 
 async def async_save_cache(
-    data: dict[str, str | dict[str, DeviceType]],
+    data: dict[str, str | dict[str, Any]],
     filename: str,
 ) -> None:
     """Save cache from file."""
