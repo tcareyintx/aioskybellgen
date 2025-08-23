@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta
 import logging
 import pickle
 from typing import Any
@@ -30,15 +29,6 @@ async def async_load_cache(
         pickled_foo = await file.read()
 
     return pickle.loads(pickled_foo)
-
-
-def calculate_expiration(expires_in: int, slack: int, refresh_cycle: int) -> datetime:
-    """Calculate the expiration datetime."""
-    if (adj_expires_in := expires_in - slack) <= refresh_cycle:
-        adj_expires_in = expires_in
-    expires = datetime.now() + timedelta(seconds=adj_expires_in)
-
-    return expires
 
 
 def update(

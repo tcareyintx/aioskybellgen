@@ -6,7 +6,7 @@ Tests the device initialization and attributes of the Skybell device class.
 """
 
 from asyncio.exceptions import TimeoutError as Timeout
-from datetime import datetime, timedelta
+from datetime import datetime
 import os
 from unittest.mock import patch
 
@@ -1304,11 +1304,6 @@ async def test_cache(
     old_cache_path = client._cache_path
     await client.async_delete_cache()
     assert os.path.exists(old_cache_path) is False
-
-    # Test the expires in min to the expires in
-    ts = UTILS.calculate_expiration(expires_in=1, slack=0, refresh_cycle=30)
-    ex_ts = datetime.now() + timedelta(seconds=1)
-    assert ts == ex_ts
 
     # Test coverage: update something other than a dictionary
     result = UTILS.update(dct=[], dct_merge={})

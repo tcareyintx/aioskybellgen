@@ -12,7 +12,7 @@ www.skybell.com for more information. I am in no way affiliated with Skybell.
 from __future__ import annotations
 
 import asyncio
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 import logging
 import os
 from typing import Any, cast
@@ -79,7 +79,6 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
         self._capture_local_events = capture_local_events
         self._local_event_server: asyncio.AbstractEventLoop | None = None
         self._local_event_future: asyncio.Future | None = None
-        self._refresh_cycle: int = 0
 
     async def __aenter__(self) -> Skybell:
         """Async enter."""
@@ -200,7 +199,7 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
             auth_result = response[CONST.AUTHENTICATION_RESULT]
             await self.async_update_cache({CONST.AUTHENTICATION_RESULT: auth_result})
             # Add/set the expiration date
-            await self.async_set_refresh_session_expiration(self._refresh_cycle)
+            await self._async_set_refresh_session_expiration()
             if self._login_sleep:
                 _LOGGER.info("Login successful, waiting 5 seconds...")
                 await asyncio.sleep(5)
@@ -252,14 +251,13 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
             )
             await self.async_update_cache({CONST.AUTHENTICATION_RESULT: auth_result})
             # Add/set the expiration date
-            await self.async_set_refresh_session_expiration(self._refresh_cycle)
+            await self._async_set_refresh_session_expiration()
             _LOGGER.debug("Refresh successful")
 
         return True
 
-    async def async_set_refresh_session_expiration(
+    async def _async_set_refresh_session_expiration(
         self,
-        refresh_cycle: int,
         slack: int = CONST.EXPIRATION_SLACK,
     ) -> None:
         """Set the expiration date to refresh the session.
@@ -276,14 +274,10 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
             )
         auth_result = cast(dict[str, Any], auth_result)
         expires_in = auth_result[CONST.TOKEN_EXPIRATION]
-        expiration = UTILS.calculate_expiration(
-            expires_in=expires_in,
-            slack=slack,
-            refresh_cycle=refresh_cycle,
-        )
+        adj_expires_in = expires_in - slack
+        expiration = datetime.now(timezone.utc) + timedelta(seconds=adj_expires_in)
         auth_result[CONST.EXPIRATION_DATE] = expiration
         await self._async_save_cache()
-        self._refresh_cycle = refresh_cycle
         _LOGGER.debug("Set auth expiration date to: %s", expiration)
 
     async def async_get_devices(self, refresh: bool = False) -> list[SkybellDevice]:
