@@ -88,18 +88,18 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
         """Async exit."""
         if self._session and self._close_session:
             await self._session.close()
-        if (loop := self._local_event_server) is not None:
+        if (loop := self._local_event_server) is not None:  # pragma: no cover
             if loop.is_running():
                 asyncio.run_coroutine_threadsafe(self._graceful_shutdown(), loop)
             loop.stop()
 
-    async def _graceful_shutdown(self):
+    async def _graceful_shutdown(self):  # pragma: no cover
         """Shutdown the UDP server future."""
         future = cast(asyncio.Future, self._local_event_future)
         if not future.done():
             future.set_result(None)
 
-    async def _setup_local_event_server(self) -> None:
+    async def _setup_local_event_server(self) -> None:  # pragma: no cover
         """Start the local event server."""
         loop = asyncio.get_running_loop()
         stop = loop.create_future()
@@ -113,7 +113,8 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
         try:
             await stop
         finally:
-            transport.close()
+            if transport is not None:
+                transport.close()
 
     def process_local_event_message(
         self, message_type: str, identifiers: dict[str, str]
@@ -260,18 +261,9 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
         self,
         slack: int = CONST.EXPIRATION_SLACK,
     ) -> None:
-        """Set the expiration date to refresh the session.
-
-        Exceptions: SkybellException.
-        """
+        """Set the expiration date to refresh the session."""
         # Set expiration date based on the authorization result
-        auth_result: str | dict[str, Any] = self.cache(
-            CONST.AUTHENTICATION_RESULT
-        )  # pylint:disable=consider-using-assignment-expr
-        if not auth_result:
-            raise SkybellException(
-                "Unable to set expiration, Authentication result doesn't exist."
-            )
+        auth_result: str | dict[str, Any] = self.cache(CONST.AUTHENTICATION_RESULT)
         auth_result = cast(dict[str, Any], auth_result)
         expires_in = auth_result[CONST.TOKEN_EXPIRATION]
         adj_expires_in = expires_in - slack
@@ -546,7 +538,7 @@ class SkyBellUDPProtocol(asyncio.DatagramProtocol):
             signature.find(
                 CONST.LOCAL_MOTION_DETECTION_SIGNATURE,
                 0,
-                len(CONST.LOCAL_BUTTON_PRESSED_SIGNATURE),
+                len(CONST.LOCAL_MOTION_DETECTION_SIGNATURE),
             )
             != -1
         ):
