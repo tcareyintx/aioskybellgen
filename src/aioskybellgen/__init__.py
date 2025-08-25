@@ -82,6 +82,7 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
 
     def __del__(self):
         """Delete resources for object."""
+        self.capture_local_events = False
         Skybell._shutdown_local_event_server()
 
     async def __aenter__(self) -> Skybell:
@@ -92,6 +93,7 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
         """Async exit."""
         if self._session and self._close_session:
             await self._session.close()
+        self.capture_local_events = False
         Skybell._shutdown_local_event_server()
 
     @classmethod
