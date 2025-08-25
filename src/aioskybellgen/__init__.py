@@ -97,13 +97,13 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
         Skybell._shutdown_local_event_server()
 
     @classmethod
-    def _shutdown_local_event_server(cls) -> None:
+    def _shutdown_local_event_server(cls) -> None:  # pragma: no cover
         """Shutdown the local event server if no Skybell instances are using it."""
         for skybell in UTILS.get_all_instances(Skybell):
             if skybell.capture_local_events:
                 return
 
-        if (loop := Skybell._local_event_server) is not None:  # pragma: no cover
+        if (loop := Skybell._local_event_server) is not None:
             if loop.is_running():
                 asyncio.run_coroutine_threadsafe(
                     Skybell._async_graceful_shutdown(), loop

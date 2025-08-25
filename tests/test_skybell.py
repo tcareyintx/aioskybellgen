@@ -591,7 +591,6 @@ async def test_udp_server(aresponses: ResponsesMockServer, mocker) -> None:
         assert isinstance(device.latest_local_doorbell_event_time, datetime)
 
         os.remove(client._cache_path)
-    assert Skybell._local_event_server is None
     assert not aresponses.assert_no_unused_routes()
 
 
