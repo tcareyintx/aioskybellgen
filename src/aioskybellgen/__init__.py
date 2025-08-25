@@ -44,7 +44,6 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
     _close_session = False
     _local_event_server: asyncio.AbstractEventLoop | None = None
     _local_event_future: asyncio.Future | None = None
-    _skybells: set = set()
 
     def __init__(  # pylint:disable=too-many-arguments, too-many-positional-arguments
         self,
@@ -79,30 +78,34 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
         self._cache: dict[str, Any] = {
             CONST.AUTHENTICATION_RESULT: {},
         }
-        self._capture_local_events = capture_local_events
+        self.capture_local_events = capture_local_events
+
+    def __del__(self):
+        """Delete resources for object."""
+        Skybell._shutdown_local_event_server()
 
     async def __aenter__(self) -> Skybell:
         """Async enter."""
-        Skybell._skybells.add(self)
         return self
 
     async def __aexit__(self, *exc_info: Any) -> None:
         """Async exit."""
         if self._session and self._close_session:
             await self._session.close()
-        Skybell._skybells.remove(self)
-        await Skybell._async_shutdown_local_event_server()
+        Skybell._shutdown_local_event_server()
 
     @classmethod
-    async def _async_shutdown_local_event_server(cls) -> None:
-        "Shutdown the local event server if no Skybell instances are using it."
-        for skybell in Skybell._skybells:
-            if skybell._capture_local_events:
+    def _shutdown_local_event_server(cls) -> None:
+        """Shutdown the local event server if no Skybell instances are using it."""
+        for skybell in UTILS.get_all_instances(Skybell):
+            if skybell.capture_local_events:
                 return
 
         if (loop := Skybell._local_event_server) is not None:  # pragma: no cover
             if loop.is_running():
-                asyncio.run_coroutine_threadsafe(Skybell._async_graceful_shutdown(), loop)
+                asyncio.run_coroutine_threadsafe(
+                    Skybell._async_graceful_shutdown(), loop
+                )
 
     @classmethod
     async def _async_graceful_shutdown(cls) -> None:  # pragma: no cover
@@ -116,7 +119,6 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
     @classmethod
     def _setup_local_event_server(cls) -> None:  # pragma: no cover
         """Start the local event server."""
-
         if Skybell._local_event_server is None:
             loop = asyncio.get_running_loop()
             loop.run_in_executor(
@@ -141,12 +143,12 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
                 transport.close()
 
     @classmethod
-    def _process_local_event_message(
+    def process_local_event_message(
         cls, message_type: str, identifiers: dict[str, str]
     ) -> None:
         """Process the Event message for a device."""
-        for skybell in Skybell._skybells.copy():
-            for device in skybell._devices.values():
+        for skybell in UTILS.get_all_instances(Skybell):
+            for device in skybell._devices.values():  # pylint: disable=protected-access
                 if CONST.DEVICE_IPADDR in identifiers.keys():
                     if device.ip_address == identifiers.get(CONST.DEVICE_IPADDR):
                         device.set_local_event_message(message_type)
@@ -176,7 +178,7 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
             self._user = response
 
         # Setup the local events server if needed
-        if self._capture_local_events:
+        if self.capture_local_events:
             Skybell._setup_local_event_server()
 
         # Obtain the devices for the user
@@ -540,7 +542,7 @@ class SkyBellUDPProtocol(asyncio.DatagramProtocol):
         identifiers = {}
         identifiers[CONST.DEVICE_IPADDR] = addr[0]
 
-        self._skybell._process_local_event_message(message_type, identifiers)
+        self._skybell.process_local_event_message(message_type, identifiers)
 
     def _determine_broadcast_message(self, data: bytes) -> str:
         """Determine the type of broadcast message."""

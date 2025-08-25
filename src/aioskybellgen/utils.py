@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import gc
 import logging
 import pickle
 from typing import Any
@@ -44,3 +45,12 @@ def update(
         else:
             dct[key] = value
     return dct
+
+
+def get_all_instances(of_class) -> list[Any]:
+    """Get all the Skybell object instances."""
+    _instances = []
+    for obj in gc.get_objects():
+        if isinstance(obj, of_class):
+            _instances.append(obj)
+    return _instances

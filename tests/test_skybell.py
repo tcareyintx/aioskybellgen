@@ -558,39 +558,40 @@ async def test_async_initialize_and_logout(aresponses: ResponsesMockServer) -> N
 async def test_udp_server(aresponses: ResponsesMockServer, mocker) -> None:
     """Test UDP server creation, message receiption and shutdown."""
     # Test UDP server creation.
-    client = Skybell(
+    async with Skybell(
         EMAIL,
         PASSWORD,
         auto_login=True,
         get_devices=True,
         login_sleep=False,
         capture_local_events=True,
-    )
-    login_response(aresponses)
-    user_response(aresponses)
-    devices_response(aresponses)
-    mocker.patch("aioskybellgen.Skybell._setup_local_event_server")
-    data = await client.async_initialize()
-    assert client.user_id == "1234567890abcdef12345678"
+    ) as client:
+        login_response(aresponses)
+        user_response(aresponses)
+        devices_response(aresponses)
+        mocker.patch("aioskybellgen.Skybell._setup_local_event_server")
+        data = await client.async_initialize()
+        assert client.user_id == "1234567890abcdef12345678"
 
-    assert isinstance(data[0], SkybellDevice)
-    device = client._devices["012345670123456789abcdef"]
-    assert isinstance(device, SkybellDevice)
-    assert isinstance(device.skybell, Skybell)
+        assert isinstance(data[0], SkybellDevice)
+        device = client._devices["012345670123456789abcdef"]
+        assert isinstance(device, SkybellDevice)
+        assert isinstance(device.skybell, Skybell)
 
-    # Test datagram received
-    protocol = SkyBellUDPProtocol(client)
-    protocol.connection_made(None)
-    # Test motion
-    datagram = bytes.fromhex(CONST.LOCAL_MOTION_DETECTION_SIGNATURE)
-    protocol.datagram_received(datagram, [device.ip_address, "subnet"])
-    assert isinstance(device.latest_local_motion_event_time, datetime)
-    # Test button pressed
-    datagram = bytes.fromhex(CONST.LOCAL_BUTTON_PRESSED_SIGNATURE)
-    protocol.datagram_received(datagram, [device.ip_address, "subnet"])
-    assert isinstance(device.latest_local_doorbell_event_time, datetime)
+        # Test datagram received
+        protocol = SkyBellUDPProtocol(client)
+        protocol.connection_made(None)
+        # Test motion
+        datagram = bytes.fromhex(CONST.LOCAL_MOTION_DETECTION_SIGNATURE)
+        protocol.datagram_received(datagram, [device.ip_address, "subnet"])
+        assert isinstance(device.latest_local_motion_event_time, datetime)
+        # Test button pressed
+        datagram = bytes.fromhex(CONST.LOCAL_BUTTON_PRESSED_SIGNATURE)
+        protocol.datagram_received(datagram, [device.ip_address, "subnet"])
+        assert isinstance(device.latest_local_doorbell_event_time, datetime)
 
-    os.remove(client._cache_path)
+        os.remove(client._cache_path)
+    assert Skybell._local_event_server is None
     assert not aresponses.assert_no_unused_routes()
 
 
