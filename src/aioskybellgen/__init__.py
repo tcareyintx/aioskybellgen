@@ -144,11 +144,19 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
     ) -> None:
         """Process the Event message for a device."""
         for skybell in UTILS.get_all_instances(Skybell):
-            for device in skybell._devices.values():  # pylint: disable=protected-access
-                if CONST.DEVICE_IPADDR in identifiers.keys():
-                    if device.ip_address == identifiers.get(CONST.DEVICE_IPADDR):
-                        device.set_local_event_message(message_type)
-                        break
+            skybell.notify_local_event_message(
+                message_type=message_type, identifiers=identifiers
+            )
+
+    def notify_local_event_message(
+        self, message_type: str, identifiers: dict[str, str]
+    ) -> None:
+        """Notify the Event message for a device."""
+        for device in self._devices.values():
+            if CONST.DEVICE_IPADDR in identifiers.keys():
+                if device.ip_address == identifiers.get(CONST.DEVICE_IPADDR):
+                    device.set_local_event_message(message_type)
+                    break
 
     async def async_initialize(self) -> list[SkybellDevice]:
         """Initialize the Skybell API.

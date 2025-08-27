@@ -4,9 +4,10 @@ from __future__ import annotations
 
 from typing import Any
 
+
 class TriggerData(dict):
     """Class for Webhook trigger associated with the device.
-    
+
     See /api/v5/devices/DEVICE_ID/triggers.
     """
 
@@ -22,6 +23,7 @@ class TriggerData(dict):
     updated_at: str
     disabled_on: str | None
     disabled_reason: str | None
+
 
 class TimezoneData(dict):
     """Class for Timezone settings permitted for the device.
@@ -160,5 +162,5 @@ class ActivityData(dict):
 TriggerType = list[TriggerData]
 LiveStreamConnectionData = dict[str, Any]
 ActivityType = dict[str, ActivityData]
-DeviceType = dict[str, dict[str, ActivityType] | dict[str, TriggerType]]
+DeviceType = dict[str, dict[str, ActivityType]]
 DevicesDict = dict[str, DeviceType]
