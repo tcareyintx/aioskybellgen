@@ -83,7 +83,6 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
     def __del__(self):
         """Delete resources for object."""
         self.capture_local_events = False
-        Skybell._shutdown_local_event_server()
 
     async def __aenter__(self) -> Skybell:
         """Async enter."""
@@ -94,15 +93,10 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
         if self._session and self._close_session:
             await self._session.close()
         self.capture_local_events = False
-        Skybell._shutdown_local_event_server()
 
     @classmethod
-    def _shutdown_local_event_server(cls) -> None:  # pragma: no cover
+    def shutdown_local_event_server(cls) -> None:  # pragma: no cover
         """Shutdown the local event server if no Skybell instances are using it."""
-        for skybell in UTILS.get_all_instances(Skybell):
-            if skybell.capture_local_events:
-                return
-
         if (loop := Skybell._local_event_server) is not None:
             if loop.is_running():
                 asyncio.run_coroutine_threadsafe(
@@ -119,7 +113,7 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
         Skybell._local_event_future = None
 
     @classmethod
-    def _setup_local_event_server(cls) -> None:  # pragma: no cover
+    def setup_local_event_server(cls) -> None:  # pragma: no cover
         """Start the local event server."""
         if Skybell._local_event_server is None:
             loop = asyncio.get_running_loop()
@@ -178,10 +172,6 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
         self._user = {}
         if response is not None and response:
             self._user = response
-
-        # Setup the local events server if needed
-        if self.capture_local_events:
-            Skybell._setup_local_event_server()
 
         # Obtain the devices for the user
         devices = []
