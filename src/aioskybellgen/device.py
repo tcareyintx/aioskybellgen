@@ -21,7 +21,6 @@ from .helpers.models import (  # isort:skip
     ActivityType,
     SettingsData,
     LiveStreamConnectionData,
-    TriggerType,
 )
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -468,86 +467,6 @@ class SkybellDevice:
         )
         event_time = datetime.now(tz=timezone.utc)
         self._local_events[message_type] = event_time
-
-    async def _async_create_trggers_request(
-        self, json: dict[str, str | list[str]]
-    ) -> str | None:
-        """Create trigger creates the trigger on the device.
-
-        Returns:
-        trigger_id str: The trigger id used to delete the trigger
-        """
-        url = str.replace(CONST.DEVICE_TRIGGERS_URL, "$DEVID$", self.device_id)
-        response = await self._skybell.async_send_request(
-            url, json=json, method=CONST.HTTPMethod.POST
-        )
-
-        result = ""
-        if response is not None and response:
-            pass
-
-        return result
-
-    async def async_create_trigger(
-        self, body: dict[str, str | list[str] | None]
-    ) -> str:
-        """Create the event trigger for a device.
-
-        Parameters:
-        body dict:
-            webhook_url (str): The webhook_url is the endpoint that will be contacted.
-            webhook_method (str enum): HTTPMethod class lower-case (get, post)
-            webhook_header: Header name for the the webhook.
-            header_value: Header value for the associated webhook header.
-            events list[str]: The list of device events that will trigger calls to the
-            webhook_url. An empty event list will setup the trigger for all events.
-
-        Returns:
-        str: The trigger_id to be used when deleting the trigger.
-
-        """
-        # Unpack the body
-        webhook_url: str = str(body.get("webhook_url"))
-        webhook_method: str = str(body.get("webhook_method"))
-        events: list[str] = cast(list, body.get("events"))
-        webhook_header: str = str(body.get("webhook_header"))
-        header_value: str = str(body.get("header_value"))
-
-        _LOGGER.debug("Setting a trigger to : %s for %s", webhook_url, self.device_id)
-        # Validate the settings
-        json: dict[str, str | list[str]] = {}
-        json["type"] = "webhook"
-        json["url"] = webhook_url
-        json["method"] = webhook_method.lower()
-        json["events"] = events
-        if webhook_header is not None:
-            json["header_name"] = webhook_header
-        if header_value is not None:
-            json["header_value"] = header_value
-
-        result = await self._async_create_trggers_request(json)
-        return str(result)
-
-    async def async_delete_trigger(self, trigger_id: str) -> None:
-        """Delete the event trigger for a device.
-
-        Parameters:
-        trigger_id (str): The identifier of the trigger returned when the trigger was
-        created.
-        """
-        _LOGGER.debug("Deleting a trigger: %s for %s", trigger_id, self.device_id)
-
-    async def _async_trggers_request(self) -> TriggerType:
-        """Triggers request returns a list of triggers  on the device."""
-        url = str.replace(CONST.DEVICE_TRIGGERS_URL, "$DEVID$", self.device_id)
-        response = await self._skybell.async_send_request(url)
-        return response
-
-    async def async_get_triggers(self) -> TriggerType:
-        """Return the event triggers for a device."""
-        _LOGGER.debug("Getting the triggersfor %s", self.device_id)
-        result = await self._async_trggers_request()
-        return result
 
     @property
     def skybell(self) -> Skybell:

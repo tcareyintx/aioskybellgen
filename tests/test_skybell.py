@@ -555,9 +555,9 @@ async def test_async_initialize_and_logout(aresponses: ResponsesMockServer) -> N
 
 
 @pytest.mark.asyncio
-async def test_udp_server(aresponses: ResponsesMockServer, mocker) -> None:
-    """Test UDP server creation, message receiption and shutdown."""
-    # Test UDP server creation.
+async def test_udp_server(aresponses: ResponsesMockServer) -> None:
+    """Test UDP server message reception."""
+    # Test UDP server reception.
     async with Skybell(
         EMAIL,
         PASSWORD,
@@ -569,7 +569,7 @@ async def test_udp_server(aresponses: ResponsesMockServer, mocker) -> None:
         login_response(aresponses)
         user_response(aresponses)
         devices_response(aresponses)
-        mocker.patch("aioskybellgen.Skybell._setup_local_event_server")
+
         data = await client.async_initialize()
         assert client.user_id == "1234567890abcdef12345678"
 
