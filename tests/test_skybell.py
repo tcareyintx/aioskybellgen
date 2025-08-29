@@ -6,7 +6,7 @@ Tests the device initialization and attributes of the Skybell device class.
 """
 
 from asyncio.exceptions import TimeoutError as Timeout
-from datetime import datetime, timedelta
+from datetime import datetime
 import os
 from unittest.mock import patch
 
@@ -16,7 +16,7 @@ from aresponses import ResponsesMockServer
 from freezegun.api import FrozenDateTimeFactory
 import pytest
 
-from aioskybellgen import Skybell, exceptions, utils as UTILS
+from aioskybellgen import Skybell, SkyBellUDPProtocol, exceptions, utils as UTILS
 from aioskybellgen.device import SkybellDevice
 from aioskybellgen.helpers import const as CONST
 
@@ -491,7 +491,7 @@ async def test_async_failed_request(aresponses: ResponsesMockServer) -> None:
 
 @pytest.mark.asyncio
 async def test_async_initialize_and_logout(aresponses: ResponsesMockServer) -> None:
-    """Test ;login initializing and logout."""
+    """Test login, initializing and logout."""
     # Login
     login_response(aresponses)
     client = Skybell(
@@ -551,6 +551,46 @@ async def test_async_initialize_and_logout(aresponses: ResponsesMockServer) -> N
         await client.async_login()
 
     os.remove(client._cache_path)
+    assert not aresponses.assert_no_unused_routes()
+
+
+@pytest.mark.asyncio
+async def test_udp_server(aresponses: ResponsesMockServer) -> None:
+    """Test UDP server message reception."""
+    # Test UDP server reception.
+    async with Skybell(
+        EMAIL,
+        PASSWORD,
+        auto_login=True,
+        get_devices=True,
+        login_sleep=False,
+        capture_local_events=True,
+    ) as client:
+        login_response(aresponses)
+        user_response(aresponses)
+        devices_response(aresponses)
+
+        data = await client.async_initialize()
+        assert client.user_id == "1234567890abcdef12345678"
+
+        assert isinstance(data[0], SkybellDevice)
+        device = client._devices["012345670123456789abcdef"]
+        assert isinstance(device, SkybellDevice)
+        assert isinstance(device.skybell, Skybell)
+
+        # Test datagram received
+        protocol = SkyBellUDPProtocol(client)
+        protocol.connection_made(None)
+        # Test motion
+        datagram = bytes.fromhex(CONST.LOCAL_MOTION_DETECTION_SIGNATURE)
+        protocol.datagram_received(datagram, [device.ip_address, "subnet"])
+        assert isinstance(device.latest_local_motion_event_time, datetime)
+        # Test button pressed
+        datagram = bytes.fromhex(CONST.LOCAL_BUTTON_PRESSED_SIGNATURE)
+        protocol.datagram_received(datagram, [device.ip_address, "subnet"])
+        assert isinstance(device.latest_local_doorbell_event_time, datetime)
+
+        os.remove(client._cache_path)
     assert not aresponses.assert_no_unused_routes()
 
 
@@ -1304,13 +1344,6 @@ async def test_cache(
     old_cache_path = client._cache_path
     await client.async_delete_cache()
     assert os.path.exists(old_cache_path) is False
-
-    # Test the expires in min to the expires in
-    ts = UTILS.calculate_expiration(
-        expires_in=1, slack=0, refresh_cycle=CONST.REFRESH_CYCLE
-    )
-    ex_ts = datetime.now() + timedelta(seconds=1)
-    assert ts == ex_ts
 
     # Test coverage: update something other than a dictionary
     result = UTILS.update(dct=[], dct_merge={})

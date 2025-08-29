@@ -12,8 +12,7 @@ www.skybell.com for more information. I am in no way affiliated with Skybell.
 from __future__ import annotations
 
 import asyncio
-from asyncio.exceptions import TimeoutError as Timeout
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 import logging
 import os
 from typing import Any, cast
@@ -43,6 +42,8 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
     """Main Skybell class."""
 
     _close_session = False
+    _local_event_server: asyncio.AbstractEventLoop | None = None
+    _local_event_future: asyncio.Future | None = None
 
     def __init__(  # pylint:disable=too-many-arguments, too-many-positional-arguments
         self,
@@ -54,6 +55,7 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
         disable_cache: bool = False,
         login_sleep: bool = True,
         session: ClientSession | None = None,
+        capture_local_events: bool = False,
     ) -> None:
         """Initialize Skybell object."""
         self._auto_login = auto_login
@@ -76,6 +78,11 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
         self._cache: dict[str, Any] = {
             CONST.AUTHENTICATION_RESULT: {},
         }
+        self.capture_local_events = capture_local_events
+
+    def __del__(self):
+        """Delete resources for object."""
+        self.capture_local_events = False
 
     async def __aenter__(self) -> Skybell:
         """Async enter."""
@@ -85,6 +92,78 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
         """Async exit."""
         if self._session and self._close_session:
             await self._session.close()
+        self.capture_local_events = False
+
+    @classmethod
+    def shutdown_local_event_server(cls) -> None:  # pragma: no cover
+        """Shutdown the local event server if no Skybell instances are using it."""
+        if (loop := Skybell._local_event_server) is not None:
+            if loop.is_running():
+                asyncio.run_coroutine_threadsafe(
+                    Skybell._async_graceful_shutdown(), loop
+                )
+
+    @classmethod
+    async def _async_graceful_shutdown(cls) -> None:  # pragma: no cover
+        """Shutdown the UDP server future."""
+        future = cast(asyncio.Future, Skybell._local_event_future)
+        if not future.done():
+            future.set_result(None)
+        Skybell._local_event_server = None
+        Skybell._local_event_future = None
+
+    @classmethod
+    def setup_local_event_server(
+        cls, interface: str = CONST.EVENT_SERVER_ADDR
+    ) -> None:  # pragma: no cover
+        """Start the local event server."""
+        if Skybell._local_event_server is None:
+            loop = asyncio.get_running_loop()
+            loop.run_in_executor(
+                None,
+                lambda: asyncio.run(
+                    Skybell._async_execute_local_event_server(interface)
+                ),
+            )
+
+    @classmethod
+    async def _async_execute_local_event_server(
+        cls, interface: str
+    ) -> None:  # pragma: no cover
+        loop = asyncio.get_running_loop()
+        stop = loop.create_future()
+        Skybell._local_event_server = loop
+        Skybell._local_event_future = stop
+
+        transport, _ = await loop.create_datagram_endpoint(
+            lambda: SkyBellUDPProtocol(Skybell),
+            local_addr=(interface, CONST.EVENT_SERVER_PORT),
+        )
+        try:
+            await stop
+        finally:
+            if transport is not None:
+                transport.close()
+
+    @classmethod
+    def process_local_event_message(
+        cls, message_type: str, identifiers: dict[str, str]
+    ) -> None:
+        """Process the Event message for a device."""
+        for skybell in UTILS.get_all_instances(Skybell):
+            skybell.notify_local_event_message(
+                message_type=message_type, identifiers=identifiers
+            )
+
+    def notify_local_event_message(
+        self, message_type: str, identifiers: dict[str, str]
+    ) -> None:
+        """Notify the Event message for a device."""
+        for device in self._devices.values():
+            if CONST.DEVICE_IPADDR in identifiers.keys():
+                if device.ip_address == identifiers.get(CONST.DEVICE_IPADDR):
+                    device.set_local_event_message(message_type)
+                    break
 
     async def async_initialize(self) -> list[SkybellDevice]:
         """Initialize the Skybell API.
@@ -150,16 +229,9 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
             _LOGGER.debug("Login Response: %s", response)
             # Store the Authorization result
             auth_result = response[CONST.AUTHENTICATION_RESULT]
-            # Add an expiration date
-            expires_in = auth_result[CONST.TOKEN_EXPIRATION]
-            expiration = UTILS.calculate_expiration(
-                expires_in=expires_in,
-                slack=CONST.EXPIRATION_SLACK,
-                refresh_cycle=CONST.REFRESH_CYCLE,
-            )
-            auth_result[CONST.EXPIRATION_DATE] = expiration
             await self.async_update_cache({CONST.AUTHENTICATION_RESULT: auth_result})
-
+            # Add/set the expiration date
+            await self._async_set_refresh_session_expiration()
             if self._login_sleep:
                 _LOGGER.info("Login successful, waiting 5 seconds...")
                 await asyncio.sleep(5)
@@ -205,22 +277,31 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
         )
         if response is not None and response:
             _LOGGER.debug("Token Refresh Response: %s", response)
-            # Add an expiration date
-            expires_in = response[CONST.TOKEN_EXPIRATION]
-            expiration = UTILS.calculate_expiration(
-                expires_in=expires_in,
-                slack=CONST.EXPIRATION_SLACK,
-                refresh_cycle=CONST.REFRESH_CYCLE,
-            )
-            response[CONST.EXPIRATION_DATE] = expiration
             # Update the cache entities
             UTILS.update(
                 cast(dict[str, Any], auth_result), cast(dict[str, Any], response)
             )
             await self.async_update_cache({CONST.AUTHENTICATION_RESULT: auth_result})
+            # Add/set the expiration date
+            await self._async_set_refresh_session_expiration()
             _LOGGER.debug("Refresh successful")
 
         return True
+
+    async def _async_set_refresh_session_expiration(
+        self,
+        slack: int = CONST.EXPIRATION_SLACK,
+    ) -> None:
+        """Set the expiration date to refresh the session."""
+        # Set expiration date based on the authorization result
+        auth_result: str | dict[str, Any] = self.cache(CONST.AUTHENTICATION_RESULT)
+        auth_result = cast(dict[str, Any], auth_result)
+        expires_in = auth_result[CONST.TOKEN_EXPIRATION]
+        adj_expires_in = expires_in - slack
+        expiration = datetime.now(timezone.utc) + timedelta(seconds=adj_expires_in)
+        auth_result[CONST.EXPIRATION_DATE] = expiration
+        await self._async_save_cache()
+        _LOGGER.debug("Set auth expiration date to: %s", expiration)
 
     async def async_get_devices(self, refresh: bool = False) -> list[SkybellDevice]:
         """Get all devices from Skybell.
@@ -440,6 +521,58 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
             except ClientConnectorError as ex:
                 if ex.errno == 61:
                     result = True
-            except Timeout:
+            except TimeoutError:
                 return False
         return result
+
+
+class SkyBellUDPProtocol(asyncio.DatagramProtocol):
+    """The SkyBell UDP Protocol class."""
+
+    def __init__(
+        self,
+        skybell: type[Skybell],
+    ) -> None:
+        """Initialize SkybellUDPProtocol object."""
+        self._skybell = skybell
+        self._transport = None
+
+    def connection_made(self, transport):
+        """Process connection once made."""
+        self._transport = transport
+        _LOGGER.debug("UDP Server connection made %s", self._transport)
+
+    def datagram_received(self, data, addr):
+        """Process the received datagram."""
+        message_type = self._determine_broadcast_message(data)
+        _LOGGER.debug("Received message %s from %s", message_type, addr)
+        identifiers = {}
+        identifiers[CONST.DEVICE_IPADDR] = addr[0]
+
+        self._skybell.process_local_event_message(message_type, identifiers)
+
+    def _determine_broadcast_message(self, data: bytes) -> str:
+        """Determine the type of broadcast message."""
+        signature = data.hex().upper()
+
+        message_type = CONST.UNKNOWN_EVENT
+        if (
+            signature.find(
+                CONST.LOCAL_BUTTON_PRESSED_SIGNATURE,
+                0,
+                len(CONST.LOCAL_BUTTON_PRESSED_SIGNATURE),
+            )
+            != -1
+        ):
+            message_type = CONST.BUTTON_PRESSED
+        elif (
+            signature.find(
+                CONST.LOCAL_MOTION_DETECTION_SIGNATURE,
+                0,
+                len(CONST.LOCAL_MOTION_DETECTION_SIGNATURE),
+            )
+            != -1
+        ):
+            message_type = CONST.MOTION_DETECTION
+
+        return message_type

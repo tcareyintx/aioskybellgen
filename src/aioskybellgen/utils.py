@@ -2,17 +2,18 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+import gc
+import logging
 import pickle
 from typing import Any
 
 import aiofiles
 
-from .helpers.models import DeviceType
+_LOGGER = logging.getLogger(__name__)
 
 
 async def async_save_cache(
-    data: dict[str, str | dict[str, DeviceType]],
+    data: dict[str, str | dict[str, Any]],
     filename: str,
 ) -> None:
     """Save cache from file."""
@@ -31,15 +32,6 @@ async def async_load_cache(
     return pickle.loads(pickled_foo)
 
 
-def calculate_expiration(expires_in: int, slack: int, refresh_cycle: int) -> datetime:
-    """Calculate the expiration datetime."""
-    if (adj_expires_in := expires_in - slack) <= refresh_cycle:
-        adj_expires_in = expires_in
-    expires = datetime.now() + timedelta(seconds=adj_expires_in)
-
-    return expires
-
-
 def update(
     dct: dict[str, Any],
     dct_merge: dict[str, Any],
@@ -53,3 +45,12 @@ def update(
         else:
             dct[key] = value
     return dct
+
+
+def get_all_instances(of_class) -> list[Any]:
+    """Get all the Skybell object instances."""
+    _instances = []
+    for obj in gc.get_objects():
+        if isinstance(obj, of_class):
+            _instances.append(obj)
+    return _instances

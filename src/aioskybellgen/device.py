@@ -46,6 +46,7 @@ class SkybellDevice:
         self._type = device_settings.get(CONST.MODEL_REV, "")
         self.images: dict[str, bytes | None] = {CONST.ACTIVITY: None}
         self._events: ActivityType = {}
+        self._local_events: dict[str, datetime] = {}
 
     async def _async_device_request(self) -> DeviceData:
         url = str.replace(CONST.DEVICE_URL, "$DEVID$", self.device_id)
@@ -66,7 +67,7 @@ class SkybellDevice:
     async def _async_activities_request(
         self, query: str | None = None
     ) -> list[ActivityData]:
-        """Activities returns a list of all activity on the device.
+        """Activities request returns a list of all activity on the device.
 
         Note that the activities is limited to default limit
         as pagination is not supported in the activities request.
@@ -459,6 +460,14 @@ class SkybellDevice:
             if value > CONST.SENSITIVITY_MAX and value != CONST.USE_MOTION_SENSITIVITY:
                 raise SkybellException(ERROR.INVALID_SETTING_VALUE, (setting, value))
 
+    def set_local_event_message(self, message_type: str) -> None:
+        """Set the timestamp for the latest local event message."""
+        _LOGGER.debug(
+            "Setting local event message: %s for %s", message_type, self.device_id
+        )
+        event_time = datetime.now(tz=timezone.utc)
+        self._local_events[message_type] = event_time
+
     @property
     def skybell(self) -> Skybell:
         """Get owning Skybell API hub."""
@@ -595,6 +604,12 @@ class SkybellDevice:
         return act_time
 
     @property
+    def latest_local_doorbell_event_time(self) -> datetime | None:
+        """Get latest local doorbell event."""
+        event_time = self._local_events.get(CONST.BUTTON_PRESSED, None)
+        return event_time
+
+    @property
     def latest_livestream_event_time(self) -> datetime | None:
         """Get latest livestream event."""
         if act := self.latest(event_type=CONST.LIVESTREAM_ACTIVITY):
@@ -615,6 +630,18 @@ class SkybellDevice:
         else:
             act_time = None
         return act_time
+
+    @property
+    def latest_local_motion_event_time(self) -> datetime | None:
+        """Get latest local doorbell event."""
+        event_time = self._local_events.get(CONST.MOTION_DETECTION, None)
+        return event_time
+
+    @property
+    def ip_address(self) -> str:
+        """Get the IP address of the device."""
+        telemetry = self._device_json.get(CONST.DEVICE_TELEMETRY, {})
+        return telemetry.get(CONST.DEVICE_IPADDR, "")
 
     @property
     def wifi_link_quality(self) -> str:
