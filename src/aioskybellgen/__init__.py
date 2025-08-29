@@ -113,16 +113,16 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
         Skybell._local_event_future = None
 
     @classmethod
-    def setup_local_event_server(cls) -> None:  # pragma: no cover
+    def setup_local_event_server(cls, interface: str = CONST.EVENT_SERVER_ADDR) -> None:  # pragma: no cover
         """Start the local event server."""
         if Skybell._local_event_server is None:
             loop = asyncio.get_running_loop()
             loop.run_in_executor(
-                None, lambda: asyncio.run(Skybell._async_execute_local_event_server())
+                None, lambda: asyncio.run(Skybell._async_execute_local_event_server(interface))
             )
 
     @classmethod
-    async def _async_execute_local_event_server(cls) -> None:  # pragma: no cover
+    async def _async_execute_local_event_server(cls, interface: str) -> None:  # pragma: no cover
         loop = asyncio.get_running_loop()
         stop = loop.create_future()
         Skybell._local_event_server = loop
@@ -130,7 +130,7 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
 
         transport, _ = await loop.create_datagram_endpoint(
             lambda: SkyBellUDPProtocol(Skybell),
-            local_addr=(CONST.EVENT_SERVER_ADDR, CONST.EVENT_SERVER_PORT),
+            local_addr=(interface, CONST.EVENT_SERVER_PORT),
         )
         try:
             await stop
