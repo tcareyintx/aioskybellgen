@@ -27,7 +27,6 @@ repos:
     rev: 25.1.0 # Black formatter
     hooks:
       - id: black
-        language_version: python3.12.10 # Specify Python version for Black
 
   - repo: https://github.com/PyCQA/flake8
     rev: 7.3.0 # Flake8 linter
