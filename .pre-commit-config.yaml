@@ -1,0 +1,67 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+exclude: |
+  (?x)^(
+      .*\{\{.*\}\}.*|     # Exclude any files with cookiecutter variables
+      docs/site/.*|       # Exclude mkdocs compiled files
+      \.history/.*|       # Exclude history files
+      .*cache.*/.*|       # Exclude cache directories
+      .*vscode.*/.*|       # Exclude vscode directories
+      .*venv.*/.*|        # Exclude virtual environment directories
+  )$
+
+ci:
+    skip: [pylint]
+
+repos:
+  # General hooks for various file types
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0 # Use a specific, stable revision
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-toml
+      - id: debug-statements # Catches print() or breakpoint() in Python code
+      - id: detect-private-key
+
+  # Python specific hooks
+  - repo: https://github.com/psf/black
+    rev: 25.1.0 # Black formatter
+    hooks:
+      - id: black
+
+  - repo: https://github.com/PyCQA/flake8
+    rev: 7.3.0 # Flake8 linter
+    hooks:
+      - id: flake8
+
+  - repo: https://github.com/PyCQA/isort
+    rev: 6.0.1 # isort for sorting imports
+    hooks:
+      - id: isort
+        name: isort (Python)
+        args: ["--profile", "black"] # Use Black profile for compatibility
+
+  - repo: local
+    hooks:
+      - id: pylint
+        name: pylint
+        entry: pylint
+        language: system
+        types: [python]
+        requires_serial: true
+        args:
+          [
+            "-rn", # Only display messages
+            "-sn", # Don't display the score
+          ]
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.17.1 # Mypy static type checker
+    hooks:
+      - id: mypy
+        additional_dependencies: [types-aiofiles]
+        exclude: tests/
+        # args: [--missing-imports]
