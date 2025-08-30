@@ -9,6 +9,10 @@ exclude: |
       .*vscode.*/.*|       # Exclude vscode directories
       .*venv.*/.*|        # Exclude virtual environment directories
   )$
+
+ci:
+    skip: [pylint]
+
 repos:
   # General hooks for various file types
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -47,6 +51,7 @@ repos:
         entry: pylint
         language: system
         types: [python]
+        requires_serial: true
         args:
           [
             "-rn", # Only display messages
