@@ -16,7 +16,7 @@ ci:
 repos:
   # General hooks for various file types
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0 # Use a specific, stable revision
+    rev: v6.0.0 # Use a specific, stable revision
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
