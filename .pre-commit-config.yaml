@@ -16,7 +16,7 @@ ci:
 repos:
   # General hooks for various file types
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0 # Use a specific, stable revision
+    rev: v6.0.0 # Use a specific, stable revision
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
@@ -27,8 +27,8 @@ repos:
       - id: detect-private-key
 
   # Python specific hooks
-  - repo: https://github.com/psf/black
-    rev: 25.1.0 # Black formatter
+  - repo: https://github.com/psf/black-pre-commit-mirror
+    rev: 25.9.0 # Black formatter
     hooks:
       - id: black
 
@@ -38,7 +38,7 @@ repos:
       - id: flake8
 
   - repo: https://github.com/PyCQA/isort
-    rev: 6.0.1 # isort for sorting imports
+    rev: 6.1.0 # isort for sorting imports
     hooks:
       - id: isort
         name: isort (Python)
@@ -59,7 +59,7 @@ repos:
           ]
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.17.1 # Mypy static type checker
+    rev: v1.18.2 # Mypy static type checker
     hooks:
       - id: mypy
         additional_dependencies: [types-aiofiles]
