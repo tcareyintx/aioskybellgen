@@ -38,7 +38,7 @@ repos:
       - id: flake8
 
   - repo: https://github.com/PyCQA/isort
-    rev: 6.1.0 # isort for sorting imports
+    rev: 7.0.0 # isort for sorting imports
     hooks:
       - id: isort
         name: isort (Python)
