@@ -28,7 +28,7 @@ repos:
 
   # Python specific hooks
   - repo: https://github.com/psf/black-pre-commit-mirror
-    rev: 25.9.0 # Black formatter
+    rev: 25.11.0 # Black formatter
     hooks:
       - id: black
 
