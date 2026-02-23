@@ -28,7 +28,7 @@ repos:
 
   # Python specific hooks
   - repo: https://github.com/psf/black-pre-commit-mirror
-    rev: 25.12.0 # Black formatter
+    rev: 26.1.0 # Black formatter
     hooks:
       - id: black
 
@@ -38,7 +38,7 @@ repos:
       - id: flake8
 
   - repo: https://github.com/PyCQA/isort
-    rev: 7.0.0 # isort for sorting imports
+    rev: 8.0.0 # isort for sorting imports
     hooks:
       - id: isort
         name: isort (Python)
