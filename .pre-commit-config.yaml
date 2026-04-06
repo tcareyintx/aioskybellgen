@@ -28,7 +28,7 @@ repos:
 
   # Python specific hooks
   - repo: https://github.com/psf/black-pre-commit-mirror
-    rev: 26.3.0 # Black formatter
+    rev: 26.3.1 # Black formatter
     hooks:
       - id: black
 
@@ -59,7 +59,7 @@ repos:
           ]
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.19.1 # Mypy static type checker
+    rev: v1.20.0 # Mypy static type checker
     hooks:
       - id: mypy
         additional_dependencies: [types-aiofiles]
