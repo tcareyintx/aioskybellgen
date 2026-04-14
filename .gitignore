@@ -19,3 +19,4 @@ dist
 .DS_Store
 .mypy_cache
 skybell_test@testcom.pickle
+src/aioskybellgen.egg-info/dependency_links.txt
