@@ -51,6 +51,10 @@ def get_all_instances(of_class) -> list[Any]:
     """Get all the Skybell object instances."""
     _instances = []
     for obj in gc.get_objects():
-        if isinstance(obj, of_class):
-            _instances.append(obj)
+        try:
+            if isinstance(obj, of_class):
+                _instances.append(obj)
+        except ReferenceError:  # pragma: no cover
+            pass
+
     return _instances
