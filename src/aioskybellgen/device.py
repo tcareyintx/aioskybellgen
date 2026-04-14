@@ -49,10 +49,12 @@ class SkybellDevice:
         self._local_events: dict[str, datetime] = {}
 
     async def _async_device_request(self) -> DeviceData:
+        """Send the device request to the API and return the response."""
         url = str.replace(CONST.DEVICE_URL, "$DEVID$", self.device_id)
         return await self._skybell.async_send_request(url)
 
     async def _async_snapshot_request(self) -> SnapshotData:
+        """Send the snapshot request to the API and return the response."""
         url = str.replace(CONST.DEVICE_SNAPSHOT_URL, "$DEVID$", self.device_id)
         return await self._skybell.async_send_request(url)
 
@@ -61,6 +63,7 @@ class SkybellDevice:
         json: dict[str, bool | str | int | float | dict] | None = None,
         **kwargs: Any,
     ) -> SettingsData:
+        """Send the settings request to the API and return the response."""
         url = str.replace(CONST.DEVICE_SETTINGS_URL, "$DEVID$", self.device_id)
         return await self._skybell.async_send_request(url, json=json, **kwargs)
 
@@ -191,7 +194,10 @@ class SkybellDevice:
     async def async_set_setting(
         self, key: str, value: bool | str | int | float | dict
     ) -> None:
-        """Call the API to update the settings."""
+        """Call the API to update the settings.
+
+        Exceptions SkybellException.
+        """
         # Set an attribute for the device.
         # The key isn't necessarily equal to the corresponding field
         # and may require transformation logic.
@@ -228,7 +234,10 @@ class SkybellDevice:
     async def _async_set_setting(
         self, settings: dict[str, bool | str | int | float | dict]
     ) -> None:
-        """Validate the settings and then send the POST request."""
+        """Validate the settings and then send the POST request.
+
+        Exceptions SkybellAccessControlException.
+        """
         for key, value in settings.items():
             if self.is_readonly and key not in CONST.ACL_EXCLUSIONS:
                 _LOGGER.warning(
@@ -347,8 +356,7 @@ class SkybellDevice:
 
         Allows caller to establish a live audio and video WebRTC connection with
         the SkyBell device.
-        Returns: LiveStreamConnectionData
-        Exceptions: SkybellException, SkybellAccessControlException
+        Returns: LiveStreamConnectionData.
         """
         body_data: dict[str, str | int] = {
             CONST.LIVESTREAM_FORCE_BODY: force,
@@ -373,7 +381,6 @@ class SkybellDevice:
 
         Allows caller to end a live audio and video WebRTC connection with
         the SkyBell device.
-        Exceptions: SkybellException
         """
         url = str.replace(CONST.DEVICE_LIVESTREAM_URL, "$DEVID$", self.device_id)
 
@@ -389,7 +396,6 @@ class SkybellDevice:
         """Request to reboot the device.
 
         Device will reboot 10 - 60 seconds after successful command.
-        Exceptions: SkybellException
         """
         url = str.replace(CONST.DEVICE_REBOOT_URL, "$DEVID$", self.device_id)
 

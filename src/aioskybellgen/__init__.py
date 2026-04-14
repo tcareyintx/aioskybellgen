@@ -166,10 +166,7 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
                     break
 
     async def async_initialize(self) -> list[SkybellDevice]:
-        """Initialize the Skybell API.
-
-        Exceptions: SkybellAuthentionException, SkybellException.
-        """
+        """Initialize the Skybell API."""
         if not self._disable_cache:
             await self._async_load_cache()
 
@@ -199,7 +196,7 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
     ):
         """Execute Skybell login.
 
-        Exceptions: SkybellAuthentionException, SkybellException.
+        Exceptions: SkybellAuthentionException.
         """
         if username is not None:
             self._username = username
@@ -255,7 +252,7 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
     async def async_refresh_session(self) -> bool:
         """Execute Skybell refresh.
 
-        Exceptions: SkybellAuthentionException, SkybellException.
+        Exceptions: SkybellAuthentionException.
         """
         auth_result = self.cache(CONST.AUTHENTICATION_RESULT)
         refresh_token = ""
@@ -304,10 +301,7 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
         _LOGGER.debug("Set auth expiration date to: %s", expiration)
 
     async def async_get_devices(self, refresh: bool = False) -> list[SkybellDevice]:
-        """Get all devices from Skybell.
-
-        Exceptions: kybellException.
-        """
+        """Get all devices from Skybell."""
         if refresh or len(self._devices) == 0:
             _LOGGER.info("Updating all devices...")
             response = await self.async_send_request(CONST.DEVICES_URL)
@@ -329,10 +323,7 @@ class Skybell:  # pylint:disable=too-many-instance-attributes
     async def async_get_device(
         self, device_id: str, refresh: bool = False
     ) -> SkybellDevice:
-        """Get a single device.
-
-        Exceptions: SkybellException.
-        """
+        """Get a single device."""
         if len(self._devices) == 0:
             await self.async_get_devices(refresh=refresh)
             refresh = False
