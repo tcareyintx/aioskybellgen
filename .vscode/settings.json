@@ -32,4 +32,5 @@
         "compounds": []
     },
     "debugpy.debugJustMyCode": false
+    "git.allowNoVerifyCommit": true
 }
