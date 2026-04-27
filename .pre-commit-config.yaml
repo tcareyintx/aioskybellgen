@@ -38,7 +38,7 @@ repos:
       - id: flake8
 
   - repo: https://github.com/PyCQA/isort
-    rev: 8.0.1 # isort for sorting imports
+    rev: 9.0.0a3 # isort for sorting imports
     hooks:
       - id: isort
         name: isort (Python)
@@ -59,7 +59,7 @@ repos:
           ]
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.20.1 # Mypy static type checker
+    rev: v1.20.2 # Mypy static type checker
     hooks:
       - id: mypy
         additional_dependencies: [types-aiofiles]
