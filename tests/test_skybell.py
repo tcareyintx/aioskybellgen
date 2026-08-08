@@ -208,8 +208,23 @@ def snapshot_response(aresponses: ResponsesMockServer, device: str) -> None:
     )
 
 
+def snapshot_not_found_response(aresponses: ResponsesMockServer, device: str) -> None:
+    """Generate snapshot not found response."""
+    path = f"/api/v5/devices/{device}/snapshot/"
+    aresponses.add(
+        "api.skybell.network",
+        path,
+        "GET",
+        aresponses.Response(
+            status=400,
+            headers={"Content-Type": "application/json"},
+            text=load_fixture("device_snapshot_not_found.json"),
+        ),
+    )
+
+
 def activities_response(aresponses: ResponsesMockServer, device: str) -> None:
-    """Generate snapshot response."""
+    """Generate activities response."""
     path = f"/api/v5/activity?device_id={device}"
     aresponses.add(
         "api.skybell.network",
@@ -225,7 +240,7 @@ def activities_response(aresponses: ResponsesMockServer, device: str) -> None:
 
 
 def failed_activities_response(aresponses: ResponsesMockServer, device: str) -> None:
-    """Generate snapshot response."""
+    """Generate failed activities response."""
     path = f"/api/v5/activity?device_id={device}"
     aresponses.add(
         "api.skybell.network",
@@ -243,7 +258,7 @@ def failed_activities_response(aresponses: ResponsesMockServer, device: str) -> 
 def activities_image_response(
     aresponses: ResponsesMockServer, device: str, query: str
 ) -> None:
-    """Generate snapshot response."""
+    """Generate image response."""
     path = f"/api/v5/activity?device_id={device}{query}"
     aresponses.add(
         "api.skybell.network",
@@ -807,6 +822,62 @@ async def test_async_refresh_device(
     assert device.device_id == "012345670123456789abcdef"
     assert device._device_json["name"] == "FrontDoor"
     assert device.name == "FrontDoor"
+
+    # Clear the cache file
+    os.remove(client._cache_path)
+
+    assert aresponses.assert_no_unused_routes() is None
+
+
+@pytest.mark.asyncio
+async def test_snapshot_not_found_device(
+    aresponses: ResponsesMockServer,
+    client: Skybell,
+    freezer: FrozenDateTimeFactory,
+) -> None:
+    """Test refreshing device."""
+    freezer.move_to("2023-03-30 13:33:00+00:00")
+    login_response(aresponses)
+    devices_response(aresponses)
+    data = await client.async_get_devices()
+    device = data[0]
+
+    # Test the update for the devices
+    device_response(aresponses, device.device_id)
+    snapshot_not_found_response(aresponses, device.device_id)
+    activities_response(aresponses, device.device_id)
+    query = "&start=1751732390135&end=1751732392135&nopreviews=0"
+    activities_image_response(aresponses, device.device_id, query)
+    await device.async_update(get_devices=True)
+    assert device._device_json["device_id"] == "012345670123456789abcdef"
+    assert device.device_id == "012345670123456789abcdef"
+    assert device._device_json["name"] == "FrontDoor"
+    assert device.name == "FrontDoor"
+
+    # Test the images
+    assert CONST.SNAPSHOT not in device.images
+
+    # Test the activities for the device
+    data = device.activities()[0]
+
+    assert data["activity_id"] == "bdc15f68-4c7b-41e2-8c54-adfb800898a9"
+    assert data["event_type"] == "doorbell"
+    assert data["event_time"] == 1751732391135
+    assert data["device_id"] == "012345670123456789abcdef"
+    assert data["image"] is None
+    assert data["video_ready"] is True
+    assert data["video_url"] == "/activity/act-doorbell/video"
+
+    assert isinstance(device.activities(event="motion"), list)
+    assert isinstance(device.latest(event_type="motion"), dict)
+    assert (
+        device.latest(event_type="motion")[CONST.CREATED_AT]
+        == "2019-07-05T14:30:17.659Z"
+    )
+    assert (
+        device.latest(event_type="doorbell")[CONST.CREATED_AT]
+        == "2019-07-05T16:19:51.157Z"
+    )
 
     # Clear the cache file
     os.remove(client._cache_path)
