@@ -10,7 +10,11 @@ from typing import TYPE_CHECKING, Any, cast
 import aiofiles
 
 from . import utils as UTILS
-from .exceptions import SkybellAccessControlException, SkybellException
+from .exceptions import (
+    SkybellAccessControlException,
+    SkybellException,
+    SkybellRequestException,
+)
 from .helpers import const as CONST, errors as ERROR
 from .helpers.const import RESPONSE_ROWS
 
@@ -56,7 +60,14 @@ class SkybellDevice:
     async def _async_snapshot_request(self) -> SnapshotData:
         """Send the snapshot request to the API and return the response."""
         url = str.replace(CONST.DEVICE_SNAPSHOT_URL, "$DEVID$", self.device_id)
-        return await self._skybell.async_send_request(url)
+        try:
+            response = await self._skybell.async_send_request(url)
+        except SkybellRequestException as err:
+            _LOGGER.debug(
+                "Snapshot not available for device %s: %s", self.device_id, err
+            )
+            response = None
+        return response
 
     async def _async_settings_request(
         self,
@@ -469,7 +480,9 @@ class SkybellDevice:
     def set_local_event_message(self, message_type: str) -> None:
         """Set the timestamp for the latest local event message."""
         _LOGGER.debug(
-            "Setting local event message: %s for %s", message_type, self.device_id
+            "Setting local event message: %s for %s",
+            message_type,
+            self.device_id,
         )
         event_time = datetime.now(tz=timezone.utc)
         self._local_events[message_type] = event_time
