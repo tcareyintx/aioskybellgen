@@ -33,12 +33,12 @@ repos:
       - id: black
 
   - repo: https://github.com/PyCQA/flake8
-    rev: 7.4.1 # Flake8 linter
+    rev: 7.5.0 # Flake8 linter
     hooks:
       - id: flake8
 
   - repo: https://github.com/PyCQA/isort
-    rev: 10.0.0b1 # isort for sorting imports
+    rev: 10.0.0b2 # isort for sorting imports
     hooks:
       - id: isort
         name: isort (Python)
@@ -59,7 +59,7 @@ repos:
           ]
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v2.4.0 # Mypy static type checker
+    rev: v2.4.1 # Mypy static type checker
     hooks:
       - id: mypy
         additional_dependencies: [types-aiofiles]
